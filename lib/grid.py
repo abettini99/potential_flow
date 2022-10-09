@@ -6,15 +6,19 @@ import numpy as np
 import numpy.typing as npt
 from dataclasses import dataclass, field
 try:
-    from flow_uniform import *
-    from flow_source import *
-    from flow_doublet import *
-    from flow_vortex import *
+    from elemflows.uniform import *
+    from elemflows.source import *
+    from elemflows.doublet import *
+    from elemflows.vortex import *
+    from presets.cylinder import *
+    from presets.rotatingcylinder import *
 except ModuleNotFoundError:
-    from lib.flow_uniform import *
-    from lib.flow_source import *
-    from lib.flow_doublet import *
-    from lib.flow_vortex import *
+    from lib.elemflows.uniform import *
+    from lib.elemflows.source import *
+    from lib.elemflows.doublet import *
+    from lib.elemflows.vortex import *
+    from lib.presets.cylinder import *
+    from lib.presets.rotatingcylinder import *
 
 # Functions / Classes
 @dataclass() # Not super necessary to have this decorator for this to work, but it is still nice to have.
@@ -37,6 +41,7 @@ class Grid:
     phi: npt.NDArray[np.float32]      = field(init=False, repr=False)
     psi: npt.NDArray[np.float32]      = field(init=False, repr=False)
     flowlist: list[object]            = field(init=False, repr=False)
+    presets: list[object]            = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         x_arr = np.linspace( self.xDomain[0], self.xDomain[1], self.Ncells[0]+1, dtype=np.float32 )
@@ -49,25 +54,27 @@ class Grid:
         self.psi   = np.empty( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
 
         self.flowlist = []
+        self.presets = []
 
     def add_UniformFlow(self, Vinfty: float, angle: float) -> None:
         self.flowlist.append( FlowUniform(Vinfty, angle) )
-
     def add_SourceFlow(self, strength: float, position: tuple[float,float] ) -> None:
         self.flowlist.append( FlowSource(strength, position) )
-
     def add_DoubletFlow(self, strength: float, position: tuple[float,float] ) -> None:
         self.flowlist.append( FlowDoublet(strength, position) )
-
     def add_VortexFlow(self, strength: float, position: tuple[float,float] ) -> None:
         self.flowlist.append( FlowVortex(strength, position) )
+    def add_Cylinder(self, Vinfty: float, radius: float, position: tuple[float,float] ) -> None:
+        self.presets.append( PresetCylinder(Vinfty, radius, position) )
+    def add_RotatingCylinder(self, Vinfty: float, strength: float, radius: float, position: tuple[float,float] ) -> None:
+        self.presets.append( PresetRotatingCylinder(Vinfty, strength, radius, position) )
 
     def calculate_fields(self) -> None:
         self.u *= 0
         self.v *= 0
         self.phi *= 0
         self.psi *= 0
-        for flow in self.flowlist:
+        for flow in (self.flowlist + self.presets):
             du, dv, dphi, dpsi = flow.calculate_contribution(self.x, self.y)
             self.u += du
             self.v += dv
@@ -75,18 +82,19 @@ class Grid:
             self.psi += dpsi
 
 if __name__ == "__main__":
-
-
-    grid: Grid = Grid((-1,1),(-1,1),(30,35))
-    grid.add_UniformFlow(1, np.deg2rad(0))
-    # grid.add_SourceFlow(1, (0.5,0))
+    grid: Grid = Grid((-2,2),(-2,2),(121,141))
+    # grid.add_UniformFlow(1, 0)
+    # grid.add_SourceFlow(2, (0.5,0))
     # grid.add_SourceFlow(-1, (-0.5,0))
-    grid.add_DoubletFlow(1, (0,0))
-    grid.add_VortexFlow(1, (0,0))
+    # grid.add_DoubletFlow(1, (0,0))
+    # grid.add_VortexFlow(1, (0,0))
+    # grid.add_Cylinder(1, 0.5, (0,1))
+    grid.add_RotatingCylinder(1, 4*np.pi*1*0.5, 0.5, (0,0))
 
     grid.calculate_fields()
 
     import matplotlib.pyplot as plt
 
-    plt.contour(grid.x,grid.y, grid.psi, levels = 50)
+    # plt.contourf(grid.x,grid.y, grid.u, levels = 30)
+    plt.contour(grid.x,grid.y, grid.psi, levels = 30, colors='black', linestyles='-')
     plt.show()
