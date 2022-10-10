@@ -41,7 +41,7 @@ class Grid:
     phi: npt.NDArray[np.float32]      = field(init=False, repr=False)
     psi: npt.NDArray[np.float32]      = field(init=False, repr=False)
     flowlist: list[object]            = field(init=False, repr=False)
-    presets: list[object]            = field(init=False, repr=False)
+    presets: list[object]             = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         x_arr = np.linspace( self.xDomain[0], self.xDomain[1], self.Ncells[0]+1, dtype=np.float32 )
@@ -69,7 +69,7 @@ class Grid:
     def add_RotatingCylinder(self, Vinfty: float, strength: float, radius: float, position: tuple[float,float] ) -> None:
         self.presets.append( PresetRotatingCylinder(Vinfty, strength, radius, position) )
 
-    def calculate_fields(self) -> None:
+    def superimpose_fields(self) -> None:
         self.u *= 0
         self.v *= 0
         self.phi *= 0
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # grid.add_Cylinder(1, 0.5, (0,1))
     grid.add_RotatingCylinder(1, 4*np.pi*1*0.5, 0.5, (0,0))
 
-    grid.calculate_fields()
+    grid.superimpose_fields()
 
     import matplotlib.pyplot as plt
 
