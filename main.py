@@ -117,14 +117,21 @@ if st.session_state['update_trigger']:
 
     ## Plot
     fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False)
-    ax[0,0].contourf(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, levels=10)
-    ax[0,0].set_title('u')
-    ax[0,1].contourf(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].v, levels=10)
-    ax[0,1].set_title('v')
+
+    # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
+    # Matplotlib streamplots
+    ax[0,0].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, st.session_state['grid'].v,
+        linewidth=1, cmap=plt.cm.inferno, density=2, arrowstyle='->', arrowsize=0.5)
+    ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
+    ax[0,1].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, -st.session_state['grid'].v, st.session_state['grid'].u,
+        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='-', arrowsize=0.0) # Using the definition of the streamfunction
+    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
+
+    # Potential flow plots
     ax[1,0].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].psi, levels=30, colors='black', linestyles='-')
-    ax[1,0].set_title(r'$\psi$')
+    ax[1,0].set_title(r'$\psi$, potential flow theory')
     ax[1,1].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].phi, levels=30, colors='black', linestyles='-')
-    ax[1,1].set_title(r'$\phi$')
+    ax[1,1].set_title(r'$\phi$, potential flow theory')
     st.pyplot(fig)
 
     ## Remove update trigger at the end of update
