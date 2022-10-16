@@ -121,7 +121,7 @@ if st.session_state['update_trigger']:
     # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
     # Matplotlib streamplots
     ax[0,0].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, st.session_state['grid'].v,
-        linewidth=1, cmap=plt.cm.inferno, density=2, arrowstyle='->', arrowsize=0.5)
+        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='->', arrowsize=0.5)
     ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
     ax[0,1].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, -st.session_state['grid'].v, st.session_state['grid'].u,
         linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='-', arrowsize=0.0) # Using the definition of the streamfunction
