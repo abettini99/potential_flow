@@ -31,7 +31,7 @@ class PresetRotatingCylinder:
         r       = np.sqrt(dx*dx + dy*dy)
         theta   = np.arctan2(dy,dx)
 
-        Vr      = self.Vinfty*r*np.sin(theta) * (1-(self.radius/r)**2)
+        Vr      = self.Vinfty*np.cos(theta) * (1-(self.radius/r)**2)
         Vtheta  = -self.Vinfty*np.sin(theta) * (1+(self.radius/r)**2) - self.strength/(2*np.pi*r)
 
         du      = Vr*np.cos(theta) - Vtheta*np.sin(theta)
