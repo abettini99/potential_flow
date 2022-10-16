@@ -48,10 +48,10 @@ class Grid:
         y_arr = np.linspace( self.yDomain[0], self.yDomain[1], self.Ncells[1]+1, dtype=np.float32 )
         self.x, self.y = np.meshgrid(x_arr,y_arr)
 
-        self.u     = np.empty( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 ) # Remember, rows -> variation in y, columns -> variation in x
-        self.v     = np.empty( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
-        self.phi   = np.empty( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
-        self.psi   = np.empty( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+        self.u     = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 ) # Remember, rows -> variation in y, columns -> variation in x
+        self.v     = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+        self.phi   = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+        self.psi   = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
 
         self.flowlist = []
         self.presets = []
@@ -68,6 +68,20 @@ class Grid:
         self.presets.append( PresetCylinder(Vinfty, radius, position) )
     def add_RotatingCylinder(self, Vinfty: float, strength: float, radius: float, position: tuple[float,float] ) -> None:
         self.presets.append( PresetRotatingCylinder(Vinfty, strength, radius, position) )
+
+    def update_grid(self, xDomain: tuple[float,float], yDomain: tuple[float,float], Ncells: tuple[float,float]) -> None:
+        x_arr = np.linspace( self.xDomain[0], self.xDomain[1], self.Ncells[0]+1, dtype=np.float32 )
+        y_arr = np.linspace( self.yDomain[0], self.yDomain[1], self.Ncells[1]+1, dtype=np.float32 )
+        self.x, self.y = np.meshgrid(x_arr,y_arr)
+
+        self.u     = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 ) # Remember, rows -> variation in y, columns -> variation in x
+        self.v     = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+        self.phi   = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+        self.psi   = np.zeros( (self.Ncells[1]+1, self.Ncells[0]+1), dtype=np.float32 )
+
+    def clear(self) -> None:
+        self.flowlist = []
+        self.presets = []
 
     def superimpose_fields(self) -> None:
         self.u *= 0
