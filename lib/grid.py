@@ -69,7 +69,11 @@ class Grid:
     def add_RotatingCylinder(self, Vinfty: float, strength: float, radius: float, position: tuple[float,float] ) -> None:
         self.presets.append( PresetRotatingCylinder(Vinfty, strength, radius, position) )
 
-    def update_grid(self, xDomain: tuple[float,float], yDomain: tuple[float,float], Ncells: tuple[float,float]) -> None:
+    def update_general(self, xDomain: tuple[float,float], yDomain: tuple[float,float], Ncells: tuple[float,float]) -> None:
+        self.xDomain = xDomain
+        self.yDomain = yDomain
+        self.Ncells = Ncells
+
         x_arr = np.linspace( self.xDomain[0], self.xDomain[1], self.Ncells[0]+1, dtype=np.float32 )
         y_arr = np.linspace( self.yDomain[0], self.yDomain[1], self.Ncells[1]+1, dtype=np.float32 )
         self.x, self.y = np.meshgrid(x_arr,y_arr)
