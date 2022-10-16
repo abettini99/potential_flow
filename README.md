@@ -17,7 +17,7 @@
  To run the code, execute the following command on terminal/prompt:
 
  ```bash
- python -m streamlit run main.py
+ python3 -m streamlit run main.py
  ```
 
  or execute the following command if you are utilizing anaconda:
