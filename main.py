@@ -4,6 +4,8 @@
 # Library imports
 from lib.grid import *
 from numpy import deg2rad
+from PIL import Image
+import lib.utils as utils
 import streamlit as st
 import matplotlib.pyplot as plt
 
@@ -19,6 +21,28 @@ if 'grid' not in st.session_state:
 ## Update trigger:
 if 'update_trigger' not in st.session_state:
     st.session_state['update_trigger'] = False
+
+    # Prepare image
+    utils.prepare_graphs()
+    fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False, figsize=(16,16))
+    for axe in ( ax[0,0], ax[0,1], ax[1,0], ax[1,1] ):
+        axe.set_xlim(st.session_state['grid'].xDomain[0], st.session_state['grid'].xDomain[1])
+        axe.set_ylim(st.session_state['grid'].yDomain[0], st.session_state['grid'].yDomain[1])
+        axe.grid(True,which="major",color="#999999",alpha=0.75)
+        axe.grid(True,which="minor",color="#DDDDDD",ls="--",alpha=0.50)
+        axe.minorticks_on()
+        axe.tick_params(which='major', length=10, width=2, direction='inout')
+        axe.tick_params(which='minor', length=5, width=2, direction='in')
+
+    # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
+    # Matplotlib streamplots
+    ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
+    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
+    # Potential flow plots
+    ax[1,0].set_title(r'$\psi$, potential flow theory')
+    ax[1,1].set_title(r'$\phi$, potential flow theory')
+    # Save figure
+    plt.savefig('images\streamline_potential.png', bbox_inches='tight')
 
 #### ================ ####
 #### Main application ####
@@ -115,24 +139,38 @@ if st.session_state['update_trigger']:
     ## Superimpose solutions
     st.session_state['grid'].superimpose_fields()
 
-    ## Plot
-    fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False)
+    utils.prepare_graphs()
+    fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False, figsize=(16,16))
+    for axe in ( ax[0,0], ax[0,1], ax[1,0], ax[1,1] ):
+        axe.set_xlim(st.session_state['grid'].xDomain[0], st.session_state['grid'].xDomain[1])
+        axe.set_ylim(st.session_state['grid'].yDomain[0], st.session_state['grid'].yDomain[1])
+        axe.grid(True,which="major",color="#999999",alpha=0.75)
+        axe.grid(True,which="minor",color="#DDDDDD",ls="--",alpha=0.50)
+        axe.minorticks_on()
+        axe.tick_params(which='major', length=10, width=2, direction='inout')
+        axe.tick_params(which='minor', length=5, width=2, direction='in')
 
     # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
     # Matplotlib streamplots
-    ax[0,0].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, st.session_state['grid'].v,
-        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='->', arrowsize=0.5)
     ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
+    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
+    ax[0,0].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, st.session_state['grid'].v,
+        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='->', arrowsize=2.0)
     ax[0,1].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, -st.session_state['grid'].v, st.session_state['grid'].u,
         linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='-', arrowsize=0.0) # Using the definition of the streamfunction
-    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
 
     # Potential flow plots
-    ax[1,0].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].psi, levels=30, colors='black', linestyles='-')
     ax[1,0].set_title(r'$\psi$, potential flow theory')
-    ax[1,1].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].phi, levels=30, colors='black', linestyles='-')
     ax[1,1].set_title(r'$\phi$, potential flow theory')
-    st.pyplot(fig)
+    ax[1,0].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].psi, levels=30, colors='black', linestyles='-')
+    ax[1,1].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].phi, levels=30, colors='black', linestyles='-')
+
+    # Save figure
+    plt.savefig('images\streamline_potential.png', bbox_inches='tight')
 
     ## Remove update trigger at the end of update
     st.session_state['update_trigger'] = False
+
+# st.text(st.session_state['path']  + '\images\streamline_potential.png')
+image = Image.open('images\streamline_potential.png')
+st.image(image, use_column_width = True)
