@@ -71,6 +71,8 @@ with general:
         st.session_state['grid'].update_general( (xmin,xmax), (ymin,ymax), (Nx,Ny) )
         st.session_state['update_trigger'] = True
 
+
+
 with uniform:
     speed       = st.number_input("Freestream speed", value=1.)
     angle       = st.number_input("Angle-of-attack in degrees", value=0.)
@@ -171,6 +173,13 @@ if st.session_state['update_trigger']:
     ## Remove update trigger at the end of update
     st.session_state['update_trigger'] = False
 
+st.title("Test")
+
 # st.text(st.session_state['path']  + '\images\streamline_potential.png')
 image = Image.open('images\streamline_potential.png')
 st.image(image, use_column_width = True)
+
+
+st.header("List of elements:")
+for element in st.session_state['grid'].flowlist:
+    st.text(repr(element))
