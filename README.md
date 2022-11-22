@@ -12,7 +12,7 @@
 
  Note that if you are utilizing old versions of Numpy, modules like Scipy and Numba need to be updated.
 
- ## How to use
+ ## Execution
 
  To run the code, execute the following command on terminal/prompt:
 
@@ -27,3 +27,9 @@
  ```
 
  which will output a localhost window on your browser.
+
+## Alternative Execution
+
+You can use the following URL to get a web instance of application:
+
+https://abettini99-potential-flow-tool-main-ywy11w.streamlit.app/
