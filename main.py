@@ -65,8 +65,8 @@ with general:
     xmax    = st.number_input("xmax", value=1.)
     ymin    = st.number_input("ymin", value=-1.)
     ymax    = st.number_input("ymax", value=1.)
-    Nx      = st.number_input("Number of cells in x-direction", value=61)
-    Ny      = st.number_input("Number of cells in y-direction", value=61)
+    Nx      = 61 # st.number_input("Number of cells in x-direction", value=61)
+    Ny      = 61 # st.number_input("Number of cells in y-direction", value=61)
     if st.button("Update Grid"):
         st.session_state['grid'].update_general( (xmin,xmax), (ymin,ymax), (Nx,Ny) )
         st.session_state['update_trigger'] = True
