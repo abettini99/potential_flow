@@ -32,4 +32,4 @@
 
 You can use the following URL to get a web instance of application:
 
-https://abettini99-potential-flow-tool-main-ywy11w.streamlit.app/
+https://abettini99-potential-flow-tool.streamlit.app/
