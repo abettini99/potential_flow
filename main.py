@@ -129,7 +129,6 @@ with rotating_cylinder:
         st.session_state['grid'].add_RotatingCylinder( speed, strength, radius, (xpos,ypos))
         st.session_state['update_trigger'] = True
 
-
 #### ================== ####
 #### Update Information ####
 #### ================== ####
@@ -171,6 +170,24 @@ if st.session_state['update_trigger']:
     ## Remove update trigger at the end of update
     st.session_state['update_trigger'] = False
 
+
 # st.text(st.session_state['path']  + '\images\streamline_potential.png')
 image = Image.open('images\streamline_potential.png')
 st.image(image, use_column_width = True)
+
+## Do a super-hack:
+## I would normally not do the redundant line of making option = flowobj
+## but it seems that option is a session-state variable, and not the actual grid object itself
+## therefore you cannot modify option, but can modify flowobj
+option = st.selectbox("TEST", options=st.session_state['grid'].flowlist)
+flowobj = [obj for obj in st.session_state['grid'].flowlist if obj == option][0]
+
+if flowobj.type == 'Uniform':
+    speed       = st.number_input("Freestream speed", value=flowobj.Vinfty, key='tmp1')
+    angle       = st.number_input("Angle-of-attack in degrees", value=flowobj.angle, key='tmp2')
+
+    if st.button("Update",key='tmp3'):
+        flowobj.Vinfty = float(speed)
+        flowobj.angle = float(angle)
+
+        st.session_state['update_trigger'] = True
