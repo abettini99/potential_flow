@@ -232,5 +232,3 @@ if not len(st.session_state['grid'].flowlist) == 0:
             flowobj.strength = float(strength)
 
             st.session_state['update_trigger'] = True
-
-    st.session_state['grid'].flowlist = st.session_state['grid'].flowlist
