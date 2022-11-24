@@ -8,6 +8,7 @@ from PIL import Image
 import lib.utils as utils
 import streamlit as st
 import matplotlib.pyplot as plt
+import math as m
 
 #### =================== ####
 #### Session Information ####
@@ -179,15 +180,57 @@ st.image(image, use_column_width = True)
 ## I would normally not do the redundant line of making option = flowobj
 ## but it seems that option is a session-state variable, and not the actual grid object itself
 ## therefore you cannot modify option, but can modify flowobj
-option = st.selectbox("TEST", options=st.session_state['grid'].flowlist)
-flowobj = [obj for obj in st.session_state['grid'].flowlist if obj == option][0]
+if not len(st.session_state['grid'].flowlist) == 0:
+    option = st.selectbox("TEST", options=st.session_state['grid'].flowlist)
+    flowobj = [obj for obj in st.session_state['grid'].flowlist if obj == option][0]
 
-if flowobj.type == 'Uniform':
-    speed       = st.number_input("Freestream speed", value=flowobj.Vinfty, key='tmp1')
-    angle       = st.number_input("Angle-of-attack in degrees", value=flowobj.angle, key='tmp2')
+    if flowobj.type == 'Uniform':
+        speed       = st.number_input("Freestream speed", value=flowobj.Vinfty, key='speed_update')
+        angle       = st.number_input("Angle-of-attack in degrees", value=flowobj.angle, key='angle_update')
 
-    if st.button("Update",key='tmp3'):
-        flowobj.Vinfty = float(speed)
-        flowobj.angle = float(angle)
+        if st.button("Update",key='tmp3'):
+            flowobj.Vinfty = float(speed)
+            flowobj.angle = float(angle)
 
-        st.session_state['update_trigger'] = True
+            st.session_state['update_trigger'] = True
+
+    if flowobj.type == 'Source':
+        xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+        ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+        strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+        if st.button("Update",key='tmp3'):
+            flowobj.position = (float(xpos),float(ypos))
+            flowobj.x0 = float(xpos)
+            flowobj.y0 = float(ypos)
+            flowobj.strength = float(strength)
+
+            st.session_state['update_trigger'] = True
+
+    if flowobj.type == 'Doublet':
+        xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+        ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+        strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+        if st.button("Update",key='tmp3'):
+            flowobj.position = (float(xpos),float(ypos))
+            flowobj.x0 = float(xpos)
+            flowobj.y0 = float(ypos)
+            flowobj.strength = float(strength)
+
+            st.session_state['update_trigger'] = True
+
+    if flowobj.type == 'Vortex':
+        xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+        ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+        strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+        if st.button("Update",key='tmp3'):
+            flowobj.position = (float(xpos),float(ypos))
+            flowobj.x0 = float(xpos)
+            flowobj.y0 = float(ypos)
+            flowobj.strength = float(strength)
+
+            st.session_state['update_trigger'] = True
+
+    st.session_state['grid'].flowlist = st.session_state['grid'].flowlist
