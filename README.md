@@ -33,3 +33,5 @@
 You can use the following URL to get a web instance of application:
 
 https://abettini99-potential-flow-tool.streamlit.app/
+
+If it takes time to load, it is likely that the application is being booted up after a long time, so give it some time (e.g. 1-2 minutes)
