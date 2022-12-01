@@ -16,8 +16,10 @@ class FlowUniform:
     Vinfty: float
     angle: float
 
+    type: str = field(init=False, repr=False)
+
     def __post_init__(self) -> None:
-        pass
+        self.type = 'Uniform'
 
     def calculate_contribution(self, x, y) -> tuple[float,float,npt.NDArray[np.float32],npt.NDArray[np.float32]]:
         du      = self.Vinfty*np.cos(self.angle)

@@ -18,8 +18,10 @@ class FlowVortex:
 
     x0: float = field(init=False, repr=False)
     y0: float = field(init=False, repr=False)
+    type: str = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
+        self.type = 'Vortex'
         self.x0 = self.position[0]
         self.y0 = self.position[1]
 
