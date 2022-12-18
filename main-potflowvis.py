@@ -170,7 +170,7 @@ def adjust_objects(objects, id=None):
     for flowobj in objects:
 
         for key, val in flowobj.__dict__.items():
-            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{key}")
+            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
 
     return
 
