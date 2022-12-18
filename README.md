@@ -6,7 +6,7 @@ This tool is meant to help visualize potential flow theory using an intuitive in
 ## How to use
 You can launch a web instance of the application through [this link](https://ae2130i-potential-flow-tool.streamlit.app/). If the application hasn't been used in a while, the booting process might take several minutes.
 
-The functionality is very straigtforward:
+The functionality is very straightforward:
 * Use the `Clear Grid` and `Update Grid` buttons to remove or update all flow elements
 * Use the `Grid` tab to change the domain and mesh to compute the field
 * Use the `Layout` tab to adjust the looks of the output
