@@ -2,242 +2,245 @@
 # -*- coding: utf-8 -*-
 
 # Library imports
-from lib.grid import *
-from numpy import deg2rad
-from PIL import Image
-import lib.utils as utils
+
+from numpy import deg2rad, linspace
 import streamlit as st
-import matplotlib.pyplot as plt
-import math as m
+import plotly.express as px
+import potentialflowvisualizer as pfv
+from flowfield import Flowfield
+import copy
+
 
 #### =================== ####
 #### Session Information ####
 #### =================== ####
-# https://docs.streamlit.io/library/advanced-features/session-state
 
-## Grid:
-if 'grid' not in st.session_state:
-    st.session_state['grid'] = Grid((-1,1),(-1,1),(61,61))
-
-## Update trigger:
-if 'update_trigger' not in st.session_state:
-    st.session_state['update_trigger'] = False
-
-    # Prepare image
-    utils.prepare_graphs()
-    fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False, figsize=(16,16))
-    for axe in ( ax[0,0], ax[0,1], ax[1,0], ax[1,1] ):
-        axe.set_xlim(st.session_state['grid'].xDomain[0], st.session_state['grid'].xDomain[1])
-        axe.set_ylim(st.session_state['grid'].yDomain[0], st.session_state['grid'].yDomain[1])
-        axe.grid(True,which="major",color="#999999",alpha=0.75)
-        axe.grid(True,which="minor",color="#DDDDDD",ls="--",alpha=0.50)
-        axe.minorticks_on()
-        axe.tick_params(which='major', length=10, width=2, direction='inout')
-        axe.tick_params(which='minor', length=5, width=2, direction='in')
-
-    # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
-    # Matplotlib streamplots
-    ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
-    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
-    # Potential flow plots
-    ax[1,0].set_title(r'$\psi$, potential flow theory')
-    ax[1,1].set_title(r'$\phi$, potential flow theory')
-    # Save figure
-    plt.savefig('images\streamline_potential.png', bbox_inches='tight')
-
-#### ================ ####
-#### Main application ####
-#### ================ ####
-
-## App title
-st.sidebar.title("Potential Flow Theory Tool")
-
-## Create button for superposition of fields
-if st.sidebar.button("Clear grid"):
-    st.session_state['grid'].clear()
-    st.session_state['update_trigger'] = True
-    # st.sidebar.text(grid.flowlist)
-
-## General Test Cases
-general, uniform, source, sink, doublet, vortex, cylinder, rotating_cylinder = st.sidebar.tabs(["General", "Uniform", "Source", "Sink", "Doublet", "Vortex", "Cylinder", "Rotating Cylinder"])
-
-with general:
-    xmin    = st.number_input("xmin", value=-1.)
-    xmax    = st.number_input("xmax", value=1.)
-    ymin    = st.number_input("ymin", value=-1.)
-    ymax    = st.number_input("ymax", value=1.)
-    Nx      = 61 # st.number_input("Number of cells in x-direction", value=61)
-    Ny      = 61 # st.number_input("Number of cells in y-direction", value=61)
-    if st.button("Update Grid"):
-        st.session_state['grid'].update_general( (xmin,xmax), (ymin,ymax), (Nx,Ny) )
-        st.session_state['update_trigger'] = True
+COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
 
 
+TYPE_NAME_DICT = {
+    pfv.Freestream: "Uniform",
+    pfv.Source: "Source",
+    pfv.Doublet: "Doublet",
+    pfv.Vortex: "Vortex",
+    pfv.LineSource: "LineSource",
+}
 
-with uniform:
-    speed       = st.number_input("Freestream speed", value=1.)
-    angle       = st.number_input("Angle-of-attack in degrees", value=0.)
-    if st.button("Add Uniform Flow"):
-        st.session_state['grid'].add_UniformFlow( speed, deg2rad(angle) )
-        st.session_state['update_trigger'] = True
+PRESET_DICT = {
+    "Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0)],
+    "Rotating Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0), pfv.Vortex(1, 0, 0)],
+}
 
-with source:
-    xpos        = st.number_input("x-coordinate", value=0., key='xsource')
-    ypos        = st.number_input("y-coordinate", value=0., key='ysource')
-    strength    = st.number_input("Source strength", value=1., key='strengthsource')
-    if st.button("Add Source"):
-        st.session_state['grid'].add_SourceFlow( strength, (xpos,ypos) )
-        st.session_state['update_trigger'] = True
+ELEMENT_DEFAULT_DICT = {
+    "Uniform": pfv.Freestream(1, 0),
+    "Source": pfv.Source(1, 0, 0),
+    "Sink": pfv.Source(-1, 0, 0),
+    "Doublet": pfv.Doublet(1, 0, 0, 0),
+    "Vortex": pfv.Vortex(1, 0, 0),
+    "LineSource": pfv.LineSource(1, 0, 0, 1, 0),
+}
 
-with sink:
-    xpos        = st.number_input("x-coordinate", value=0., key='xsink')
-    ypos        = st.number_input("y-coordinate", value=0., key='ysink')
-    strength    = st.number_input("Sink strength", value=1., key='strengthsink')
-    if st.button("Add Sink"):
-        st.session_state['grid'].add_SourceFlow( -strength, (xpos,ypos) )
-        st.session_state['update_trigger'] = True
 
-with doublet:
-    xpos        = st.number_input("x-coordinate", value=0., key='xdoublet')
-    ypos        = st.number_input("y-coordinate", value=0., key='ydoublet')
-    strength    = st.number_input("Doublet strength", value=1., key='strengthdoublet')
-    if st.button("Add Doublet"):
-        st.session_state['grid'].add_DoubletFlow( strength, (xpos,ypos) )
-        st.session_state['update_trigger'] = True
+def flow_element_type(object):
+    name = TYPE_NAME_DICT[object.__class__]
+    if name == "Source" and object.strength < 0:
+        name = "Sink"
+    return name
 
-with vortex:
-    xpos        = st.number_input("x-coordinate", value=0., key='xvortex')
-    ypos        = st.number_input("y-coordinate", value=0., key='yvortex')
-    strength    = st.number_input("Vortex strength", value=1., key='strengthvortex')
-    if st.button("Add Vortex"):
-        st.session_state['grid'].add_VortexFlow( strength, (xpos,ypos) )
-        st.session_state['update_trigger'] = True
 
-with cylinder:
-    xpos        = st.number_input("x-coordinate", value=0., key='xcylinder')
-    ypos        = st.number_input("y-coordinate", value=0., key='ycylinder')
-    speed       = st.number_input("Freestream speed", value=1., key='speedcylinder')
-    radius      = st.number_input("Cylinder radius", value=1., key='radiuscylinder')
-    if st.button("Add Non-rotating Cylinder"):
-        st.session_state['grid'].add_Cylinder( speed, radius, (xpos,ypos) )
-        st.session_state['update_trigger'] = True
+def initialize_session_state():
+    for key, val in zip(
+        [
+            "xmin",
+            "xmax",
+            "ymin",
+            "ymax",
+            "xsteps",
+            "field",
+            "update_trigger",
+            "figs",
+            "plot_objects",
+            "colorscheme",
+            "n_contour_lines",
+            "show_potential",
+            "show_streamfunction",
+            "show_xvel",
+            "show_yvel",
+            "show_velmag",
+        ],
+        [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, {}, True, "Viridis", 40, True, True, False, False, False],
+    ):
+        if not key in st.session_state:
+            st.session_state[key] = val
 
-with rotating_cylinder:
-    xpos        = st.number_input("x-coordinate", value=0., key='xrotatingcylinder')
-    ypos        = st.number_input("y-coordinate", value=0., key='yrotatingcylinder')
-    speed       = st.number_input("Freestream speed", value=1., key='speedrotatingcylinder')
-    strength    = st.number_input("Vortex strength", value=1., key='strengthrotatingcylinder')
-    radius      = st.number_input("Cylinder radius", value=1., key='radiusrotatingcylinder')
-    if st.button("Add Rotating Cylinder"):
-        st.session_state['grid'].add_RotatingCylinder( speed, strength, radius, (xpos,ypos))
-        st.session_state['update_trigger'] = True
+
+initialize_session_state()
 
 #### ================== ####
 #### Update Information ####
 #### ================== ####
 
-## Update important things
-if st.session_state['update_trigger']:
-    ## Superimpose solutions
-    st.session_state['grid'].superimpose_fields()
 
-    utils.prepare_graphs()
-    fig, ax = plt.subplots(2,2, sharex=True, sharey=True, squeeze=False, figsize=(16,16))
-    for axe in ( ax[0,0], ax[0,1], ax[1,0], ax[1,1] ):
-        axe.set_xlim(st.session_state['grid'].xDomain[0], st.session_state['grid'].xDomain[1])
-        axe.set_ylim(st.session_state['grid'].yDomain[0], st.session_state['grid'].yDomain[1])
-        axe.grid(True,which="major",color="#999999",alpha=0.75)
-        axe.grid(True,which="minor",color="#DDDDDD",ls="--",alpha=0.50)
-        axe.minorticks_on()
-        axe.tick_params(which='major', length=10, width=2, direction='inout')
-        axe.tick_params(which='minor', length=5, width=2, direction='in')
+def update():
 
-    # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
-    # Matplotlib streamplots
-    ax[0,0].set_title(r'$\psi$, matplotlib.streamplot')
-    ax[0,1].set_title(r'$\phi$, matplotlib.streamplot')
-    ax[0,0].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].u, st.session_state['grid'].v,
-        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='->', arrowsize=2.0)
-    ax[0,1].streamplot(st.session_state['grid'].x, st.session_state['grid'].y, -st.session_state['grid'].v, st.session_state['grid'].u,
-        linewidth=1, cmap=plt.cm.inferno, density=1, arrowstyle='-', arrowsize=0.0) # Using the definition of the streamfunction
+    y_steps = int(
+        st.session_state["xsteps"]
+        * (st.session_state["ymax"] - st.session_state["ymin"])
+        / (st.session_state["xmax"] - st.session_state["xmin"])
+    )
+    x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
+    y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
-    # Potential flow plots
-    ax[1,0].set_title(r'$\psi$, potential flow theory')
-    ax[1,1].set_title(r'$\phi$, potential flow theory')
-    ax[1,0].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].psi, levels=30, colors='black', linestyles='-')
-    ax[1,1].contour(st.session_state['grid'].x, st.session_state['grid'].y, st.session_state['grid'].phi, levels=30, colors='black', linestyles='-')
+    for name in ["potential", "streamfunction", "xvel", "yvel", "velmag"]:
 
-    # Save figure
-    plt.savefig('images\streamline_potential.png', bbox_inches='tight')
-
-    ## Remove update trigger at the end of update
-    st.session_state['update_trigger'] = False
+        if st.session_state[f"show_{name}"]:
+            st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
+                scalar_to_plot=name,
+                x_points=x_points,
+                y_points=y_points,
+                show=False,
+                colorscheme=st.session_state["colorscheme"],
+                n_contour_lines=st.session_state["n_contour_lines"],
+                plot_flow_elements=st.session_state["plot_objects"],
+            )
 
 
-# st.text(st.session_state['path']  + '\images\streamline_potential.png')
-image = Image.open('images\streamline_potential.png')
-st.image(image, use_column_width = True)
+#### ================ ####
+#### Main application ####
+#### ================ ####
 
-## Do a super-hack:
-## I would normally not do the redundant line of making option = flowobj
-## but it seems that option is a session-state variable, and not the actual grid object itself
-## therefore you cannot modify option, but can modify flowobj
-if not len(st.session_state['grid'].flowlist) == 0:
-    with st.container():
-        st.markdown("""----""")
+st.sidebar.image("images/TU_Delft_Logo.png", width=100)
 
-        option = st.selectbox("TEST", options=st.session_state['grid'].flowlist)
-        flowobj = [obj for obj in st.session_state['grid'].flowlist if obj == option][0]
+## App title
+st.sidebar.title("Potential Flow Tool")
 
-        if flowobj.type == 'Uniform':
-            speed       = st.number_input("Freestream speed", value=flowobj.Vinfty, key='speed_update')
-            angle       = st.number_input("Angle-of-attack in degrees", value=flowobj.angle, key='angle_update')
+## App footer
+footer = """
+<style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    footer:after {
+        content:'Made with Streamlit by Andrea Bettini and Simon Van Hulle'; 
+        visibility: visible;display: block;position: relative;#background-color: red;padding: 5px;top: 2px;
+    }
+</style>
+"""
+st.markdown(footer, unsafe_allow_html=True)
 
-            if st.button("Update",key='tmp3'):
-                flowobj.Vinfty = float(speed)
-                flowobj.angle = float(angle)
 
-                st.session_state['update_trigger'] = True
+## Buttons to clear and update in sidebar
+if st.sidebar.button("Clear Grid"):
+    st.session_state["field"].objects = []
+    update()
 
-        if flowobj.type == 'Source':
-            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
-            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
-            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+if st.sidebar.button("Update Grid"):
+    update()
 
-            if st.button("Update",key='tmp3'):
-                flowobj.position = (float(xpos),float(ypos))
-                flowobj.x0 = float(xpos)
-                flowobj.y0 = float(ypos)
-                flowobj.strength = float(strength)
+## Create sidebar tabs
+welcome, grid, layout, add_element, presets = st.sidebar.tabs(
+    ["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"]
+)
 
-                st.session_state['update_trigger'] = True
+with welcome:
+    with open("README.md", "r") as ifstream:
+        text = ifstream.read()
+    st.markdown(text)
 
-        if flowobj.type == 'Doublet':
-            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
-            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
-            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+with grid:
+    st.header("Grid")
+    st.session_state["xmin"] = st.number_input("xmin", value=-1.0)
+    st.session_state["xmax"] = st.number_input("xmax", value=1.0)
+    st.session_state["ymin"] = st.number_input("ymin", value=-1.0)
+    st.session_state["ymax"] = st.number_input("ymax", value=1.0)
+    st.session_state["xsteps"] = st.number_input("x-steps on the grid", value=300)
 
-            if st.button("Update",key='tmp3'):
-                flowobj.position = (float(xpos),float(ypos))
-                flowobj.x0 = float(xpos)
-                flowobj.y0 = float(ypos)
-                flowobj.strength = float(strength)
+with layout:
+    st.header("Layout")
+    st.session_state["plot_objects"] = st.checkbox("Plot flow objects", True)
+    st.session_state["show_potential"] = st.checkbox("Plot the potential", True)
+    st.session_state["show_streamfunction"] = st.checkbox("Plot the stream function", True)
+    st.session_state["show_xvel"] = st.checkbox("Plot the x velocity", False)
+    st.session_state["show_yvel"] = st.checkbox("Plot the y velocity", False)
+    st.session_state["show_velmag"] = st.checkbox("Plot the velocity magnitude", False)
+    st.session_state["colorscheme"] = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
+    st.session_state["n_contour_lines"] = st.number_input("Number of contour lines", value=40)
 
-                st.session_state['update_trigger'] = True
 
-        if flowobj.type == 'Vortex':
-            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
-            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
-            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+def adjust_objects(objects, id=None):
+    for flowobj in objects:
 
-            if st.button("Update",key='tmp3'):
-                flowobj.position = (float(xpos),float(ypos))
-                flowobj.x0 = float(xpos)
-                flowobj.y0 = float(ypos)
-                flowobj.strength = float(strength)
+        for key, val in flowobj.__dict__.items():
+            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
 
-                st.session_state['update_trigger'] = True
+    return
 
-        st.markdown("""----""")
-        
-st.write("This is outside the container")
+
+with add_element:
+    key = st.selectbox("Select Flow Element", options=ELEMENT_DEFAULT_DICT.keys())
+
+    try:
+        flowobj = copy.deepcopy(ELEMENT_DEFAULT_DICT[key])
+
+        name = adjust_objects([flowobj], "element")
+
+        if st.button("Add ", key="add_element"):
+            st.session_state["field"].objects.extend([flowobj])
+            update()
+
+    except KeyError:
+        pass
+
+with presets:
+
+    key = st.selectbox("Select Preset", options=PRESET_DICT.keys())
+    try:
+        objects = PRESET_DICT[key]
+
+        for i, obj in enumerate(objects):
+            st.subheader(flow_element_type(obj))
+            name = adjust_objects([obj], "preset")
+
+        if st.button("Add ", key="add_preset"):
+            st.session_state["field"].objects.extend(objects)
+            update()
+
+    except KeyError:
+        pass
+
+
+## Plot the figures
+if st.session_state["figs"]:
+    st.subheader("Contour Plots")
+for title, fig in st.session_state["figs"].items():
+    st.plotly_chart(fig)
+
+
+## Adjust the flow elemetns
+if not len(st.session_state["field"].objects) == 0:
+    st.markdown("""----""")
+
+    st.subheader("Adjust your flow elements")
+
+    dropdown_dict = {}
+    for i, obj in enumerate(st.session_state["field"].objects):
+        dropdown_dict[f"{i + 1}. [{flow_element_type(obj)}]"] = obj
+
+    key = st.selectbox(
+        "Select Flow Element",
+        options=dropdown_dict.keys(),
+    )
+
+    flowobj = dropdown_dict[key]
+
+    name = adjust_objects([flowobj], "adjust")
+
+    if st.button("Update", key="update"):
+        update()
+
+    if st.button("Remove", key="remove"):
+        print(st.session_state["field"].objects)
+        print(flowobj)
+        st.session_state["field"].objects.remove(flowobj)
+        update()
+
+    st.markdown("""----""")
