@@ -101,8 +101,10 @@ def update():
 #### Main application ####
 #### ================ ####
 
+st.sidebar.image("images/TU_Delft_Logo.png", width=100)
+
 ## App title
-st.sidebar.title("Potential Flow Theory Tool")
+st.sidebar.title("Potential Flow Tool")
 
 ## App footer
 footer = """
@@ -127,7 +129,7 @@ if st.sidebar.button("Update Grid"):
     update()
 
 ## Create sidebar tabs
-welcome, grid, layout, add_element, presets = st.sidebar.tabs(["Welcome", "Grid", "Layout", "Add Flow Element", "Add Presets"])
+welcome, grid, layout, add_element, presets = st.sidebar.tabs(["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"])
 
 with welcome:
     with open("README.md", 'r') as ifstream:

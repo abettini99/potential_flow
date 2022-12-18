@@ -7,16 +7,6 @@ pio.renderers.default = (
     "browser"  # Feel free to disable this if you're running in notebook mode or prefer a different frontend.
 )
 
-
-import numpy as np
-import plotly.graph_objects as go
-import plotly.io as pio
-
-pio.renderers.default = (
-    "browser"  # Feel free to disable this if you're running in notebook mode or prefer a different frontend.
-)
-
-
 def line_color(object):
     try:
         color = "green" if object.strength > 0 else "red"
