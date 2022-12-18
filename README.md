@@ -1,32 +1,31 @@
 # Potential Flow Tool (AE2130-I Aerodynamics)
- Potential Flow, method of superposition
 
- This tool is meant to help visualize potential flow theory using an intuitive interface.
+This tool is meant to help visualize potential flow theory using an intuitive interface.
 
- ## Dependencies
- Install the required dependencies using
+## Dependencies
+Install the required dependencies using
 
- ```bash
- pip3 install -r requirements.txt
- ```
+```bash
+pip3 install -r requirements.txt
+```
 
- Note that if you are utilizing old versions of Numpy, modules like Scipy and Numba need to be updated.
+Note that if you are utilizing old versions of Numpy, modules like Scipy and Numba need to be updated.
 
- ## Execution
+## Execution
 
- To run the code, execute the following command on terminal/prompt:
+To run the code, execute the following command on terminal/prompt:
 
- ```bash
- python3 -m streamlit run main.py
- ```
+```bash
+python3 -m streamlit run main.py
+```
 
- or execute the following command if you are utilizing anaconda:
+or execute the following command if you are utilizing anaconda:
 
- ```bash
- streamlit run main.py
- ```
+```bash
+streamlit run main.py
+```
 
- which will output a localhost window on your browser.
+which will output a localhost window on your browser.
 
 ## Alternative Execution
 
