@@ -7,6 +7,15 @@ pio.renderers.default = (
     "browser"  # Feel free to disable this if you're running in notebook mode or prefer a different frontend.
 )
 
+LONG_NAME_DICT = {
+    "potential": "Velocity Potential",
+    "streamfunction": "Stream Function",
+    "xvel": "x Velocity",
+    "yvel": "y Velocity",
+    "velmag": "Velocity Magnitude",
+}
+
+
 def line_color(object):
     try:
         color = "green" if object.strength > 0 else "red"
@@ -89,7 +98,7 @@ class Flowfield:
                 z=np.reshape(scalar_to_plot_value, X.shape),
                 colorscale=colorscheme,
                 contours=dict(start=min, end=max, size=(max - min) / n_contour_lines),
-                colorbar=dict(title=scalar_to_plot, titleside="top", ticks="outside"),
+                colorbar=dict(title=LONG_NAME_DICT[scalar_to_plot], titleside="top", ticks="outside"),
             ),
         )
 

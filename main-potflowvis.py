@@ -17,6 +17,20 @@ import copy
 
 COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
 
+
+TYPE_NAME_DICT = {
+    pfv.Freestream: "Uniform",
+    pfv.Source: "Source",
+    pfv.Doublet: "Doublet",
+    pfv.Vortex: "Vortex",
+    pfv.LineSource: "LineSource",
+}
+
+PRESET_DICT = {
+    "Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0)],
+    "Rotating Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0), pfv.Vortex(1, 0, 0)],
+}
+
 ELEMENT_DEFAULT_DICT = {
     "Uniform": pfv.Freestream(1, 0),
     "Source": pfv.Source(1, 0, 0),
@@ -26,13 +40,13 @@ ELEMENT_DEFAULT_DICT = {
     "LineSource": pfv.LineSource(1, 0, 0, 1, 0),
 }
 
-ELEMENT_NAME_DICT = {
-    pfv.Freestream: "Uniform",
-    pfv.Source: "Source",
-    pfv.Doublet: "Doublet",
-    pfv.Vortex: "Vortex",
-    pfv.LineSource: "LineSource",
-}
+
+def flow_element_type(object):
+    name = TYPE_NAME_DICT[object.__class__]
+    if name == "Source" and object.strength < 0:
+        name = "Sink"
+    return name
+
 
 def initialize_session_state():
     for key, val in zip(
@@ -50,8 +64,11 @@ def initialize_session_state():
             "n_contour_lines",
             "show_potential",
             "show_streamfunction",
+            "show_xvel",
+            "show_yvel",
+            "show_velmag",
         ],
-        [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, {}, True, "Viridis", 40, True, True],
+        [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, {}, True, "Viridis", 40, True, True, False, False, False],
     ):
         if not key in st.session_state:
             st.session_state[key] = val
@@ -74,27 +91,18 @@ def update():
     x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
     y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
-    if st.session_state["show_potential"]:
-        st.session_state["figs"]["Potential Function"] = st.session_state["field"].draw(
-            scalar_to_plot="potential",
-            x_points=x_points,
-            y_points=y_points,
-            show=False,
-            colorscheme=st.session_state["colorscheme"],
-            n_contour_lines=st.session_state["n_contour_lines"],
-            plot_flow_elements=st.session_state["plot_objects"],
-        )
+    for name in ["potential", "streamfunction", "xvel", "yvel", "velmag"]:
 
-    if st.session_state["show_streamfunction"]:
-        st.session_state["figs"]["Stream Function"] = st.session_state["field"].draw(
-            scalar_to_plot="streamfunction",
-            x_points=x_points,
-            y_points=y_points,
-            show=False,
-            colorscheme=st.session_state["colorscheme"],
-            n_contour_lines=st.session_state["n_contour_lines"],
-            plot_flow_elements=st.session_state["plot_objects"],
-        )
+        if st.session_state[f"show_{name}"]:
+            st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
+                scalar_to_plot=name,
+                x_points=x_points,
+                y_points=y_points,
+                show=False,
+                colorscheme=st.session_state["colorscheme"],
+                n_contour_lines=st.session_state["n_contour_lines"],
+                plot_flow_elements=st.session_state["plot_objects"],
+            )
 
 
 #### ================ ####
@@ -129,10 +137,12 @@ if st.sidebar.button("Update Grid"):
     update()
 
 ## Create sidebar tabs
-welcome, grid, layout, add_element, presets = st.sidebar.tabs(["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"])
+welcome, grid, layout, add_element, presets = st.sidebar.tabs(
+    ["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"]
+)
 
 with welcome:
-    with open("README.md", 'r') as ifstream:
+    with open("README.md", "r") as ifstream:
         text = ifstream.read()
     st.markdown(text)
 
@@ -146,33 +156,23 @@ with grid:
 
 with layout:
     st.header("Layout")
-    st.session_state["plot_objects"] = st.checkbox("Plot flow elements", True)
+    st.session_state["plot_objects"] = st.checkbox("Plot flow objects", True)
     st.session_state["show_potential"] = st.checkbox("Plot the potential", True)
     st.session_state["show_streamfunction"] = st.checkbox("Plot the stream function", True)
+    st.session_state["show_xvel"] = st.checkbox("Plot the x velocity", False)
+    st.session_state["show_yvel"] = st.checkbox("Plot the y velocity", False)
+    st.session_state["show_velmag"] = st.checkbox("Plot the velocity magnitude", False)
     st.session_state["colorscheme"] = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
     st.session_state["n_contour_lines"] = st.number_input("Number of contour lines", value=40)
 
 
+def adjust_objects(objects, id=None):
+    for flowobj in objects:
 
+        for key, val in flowobj.__dict__.items():
+            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{key}")
 
-
-def flow_element_name(object):
-    name = ELEMENT_NAME_DICT[object.__class__]
-    if name == "Source" and object.strength < 0:
-        name = "Sink"
-    return name
-
-PRESET_DICT = {
-    "Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0)],
-    "Rotating Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0), pfv.Vortex(1, 0, 0)],
-}
-
-
-def adjust_object(flowobj, id=None):
-    for key, val in flowobj.__dict__.items():
-        flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{key}")
-
-    st.text("")
+    return
 
 
 with add_element:
@@ -181,7 +181,7 @@ with add_element:
     try:
         flowobj = copy.deepcopy(ELEMENT_DEFAULT_DICT[key])
 
-        adjust_object(flowobj, "element")
+        name = adjust_objects([flowobj], "element")
 
         if st.button("Add ", key="add_element"):
             st.session_state["field"].objects.extend([flowobj])
@@ -197,9 +197,8 @@ with presets:
         objects = PRESET_DICT[key]
 
         for i, obj in enumerate(objects):
-            st.subheader(flow_element_name(obj))
-
-            adjust_object(obj, "preset")
+            st.subheader(flow_element_type(obj))
+            name = adjust_objects([obj], "preset")
 
         if st.button("Add ", key="add_preset"):
             st.session_state["field"].objects.extend(objects)
@@ -208,33 +207,40 @@ with presets:
     except KeyError:
         pass
 
+
 ## Plot the figures
 if st.session_state["figs"]:
     st.subheader("Contour Plots")
 for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
 
+
 ## Adjust the flow elemetns
 if not len(st.session_state["field"].objects) == 0:
-    with st.container():
-        st.markdown("""----""")
+    st.markdown("""----""")
 
-        st.subheader("Adjust your flow elements")
-        object_dict = {}
-        for i, object in enumerate(st.session_state["field"].objects):
-            key = f"{str(i + 1)}. " + flow_element_name(object)
-            object_dict[key] = object
+    st.subheader("Adjust your flow elements")
 
-        key = st.selectbox("Select Flow Element", options=object_dict.keys())
-        flowobj = object_dict[key]
+    dropdown_dict = {}
+    for i, obj in enumerate(st.session_state["field"].objects):
+        dropdown_dict[f"{i + 1}. [{flow_element_type(obj)}]"] = obj
 
-        adjust_object(flowobj, "adjust")
+    key = st.selectbox(
+        "Select Flow Element",
+        options=dropdown_dict.keys(),
+    )
 
-        if st.button("Update", key="update"):
-            update()
+    flowobj = dropdown_dict[key]
 
-        if st.button("Remove", key="remove"):
-            st.session_state["field"].objects.remove(flowobj)
-            update()
+    name = adjust_objects([flowobj], "adjust")
 
-        st.markdown("""----""")
+    if st.button("Update", key="update"):
+        update()
+
+    if st.button("Remove", key="remove"):
+        print(st.session_state["field"].objects)
+        print(flowobj)
+        st.session_state["field"].objects.remove(flowobj)
+        update()
+
+    st.markdown("""----""")
