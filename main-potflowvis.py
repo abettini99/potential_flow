@@ -2,15 +2,10 @@
 # -*- coding: utf-8 -*-
 
 # Library imports
-from lib.grid import *
-from numpy import deg2rad
-from PIL import Image
-import lib.utils as utils
-import streamlit as st
-import matplotlib.pyplot as plt
-import math as m
 
-import plotly as ply
+from numpy import deg2rad, linspace
+import streamlit as st
+
 import plotly.express as px
 
 import potentialflowvisualizer as pfv
@@ -34,12 +29,11 @@ def initialize_session_state():
             st.session_state[key] = val
 
 
+initialize_session_state()
+
 #### ================== ####
 #### Update Information ####
 #### ================== ####
-
-
-initialize_session_state()
 
 
 def update():
@@ -49,8 +43,8 @@ def update():
         * (st.session_state["ymax"] - st.session_state["ymin"])
         / (st.session_state["xmax"] - st.session_state["xmin"])
     )
-    x_points = np.linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
-    y_points = np.linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
+    x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
+    y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
     fig1 = st.session_state["field"].draw(
         scalar_to_plot="potential",
@@ -82,15 +76,14 @@ if st.sidebar.button("Clear Grid"):
     # st.session_state["grid"].clear()
     st.session_state["field"].objects = []
     update()
+
 if st.sidebar.button("Update Grid"):
     update()
 
-## General Test Cases
-general, uniform, source, sink, doublet, vortex, linesource, cylinder, rotating_cylinder = st.sidebar.tabs(
-    ["General", "Uniform", "Source", "Sink", "Doublet", "Vortex", "Line Source", "Cylinder", "Rotating Cylinder"]
-)
 
-with general:
+grid, layout, add_element, presets = st.sidebar.tabs(["Grid", "Layout", "Add Flow Element", "Presets"])
+
+with grid:
     st.header("Grid")
     st.session_state["xmin"] = st.number_input("xmin", value=-1.0)
     st.session_state["xmax"] = st.number_input("xmax", value=1.0)
@@ -98,108 +91,101 @@ with general:
     st.session_state["ymax"] = st.number_input("ymax", value=1.0)
     st.session_state["xsteps"] = st.number_input("x-steps", value=300)
 
+with layout:
     st.header("Layout")
     st.session_state["plot_objects"] = st.checkbox("Plot flow elements", True)
     st.session_state["colorscheme"] = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
 
-    st.text("")
 
-
-def flow_element_name(object): 
+def flow_element_name(object):
     return str(type(object)).strip(">").strip("'").split(".")[-1]
+
 
 def default_uniform():
     return pfv.Freestream(1, 0)
 
-# for element in [default_uniform]:
-#     object = default_uniform()
-#     name = flow_element_name(object)
 
-#     with st.sidebar.tabs[name]:
-#         for key, val in object.__dict__.items():
-#             object.__dict__[key] = st.number_input(f"{key}", value=val, key=f"{key}_{name}")
-
-#         if st.button(f"Add {name}", key="update"):
-#             st.session_state["field"].objects.extend([object])
-#             update()
+def default_source():
+    return pfv.Source(1, 0, 0)
 
 
-
-with uniform:
-    u = st.number_input("Velocity x-component", value=1.0)
-    v = st.number_input("Velocity y-component", value=0.0)
-
-    if st.button("Add Uniform Flow"):
-        st.session_state["field"].objects.extend([pfv.Freestream(u, v)])
-        update()
-
-with source:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xsource")
-    ypos = st.number_input("y-coordinate", value=0.0, key="ysource")
-    strength = st.number_input("Source strength", value=1.0, key="strengthsource")
-    if st.button("Add Source"):
-        st.session_state["field"].objects.extend([pfv.Source(strength, xpos, ypos)])
-        update()
-
-with sink:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xsink")
-    ypos = st.number_input("y-coordinate", value=0.0, key="ysink")
-    strength = st.number_input("Sink strength", value=1.0, key="strengthsink")
-    if st.button("Add Sink"):
-        st.session_state["field"].objects.extend([pfv.Source(-strength, xpos, ypos)])
-        update()
-
-with doublet:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xdoublet")
-    ypos = st.number_input("y-coordinate", value=0.0, key="ydoublet")
-    strength = st.number_input("Doublet strength", value=1.0, key="strengthdoublet")
-    alpha = st.number_input("Doublet angle", value=0.0, key="alphadoublet")
-    if st.button("Add Doublet"):
-        st.session_state["field"].objects.extend([pfv.Doublet(strength, xpos, ypos, alpha)])
-        update()
-
-with vortex:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xvortex")
-    ypos = st.number_input("y-coordinate", value=0.0, key="yvortex")
-    strength = st.number_input("Vortex strength", value=1.0, key="strengthvortex")
-    if st.button("Add Vortex"):
-        st.session_state["field"].objects.extend([pfv.Vortex(strength, xpos, ypos)])
-        update()
-
-with linesource:
-    x1 = st.number_input("x1", value=0.0, key="x1")
-    y1 = st.number_input("x2", value=0.0, key="y1")
-    x2 = st.number_input("x2", value=1.0, key="x2")
-    y2 = st.number_input("y2", value=0.0, key="y2")
-    strength = st.number_input("Source strength", value=1.0, key="strengthlinesource")
-
-    if st.button("Add Line source"):
-        st.session_state["field"].objects.extend([pfv.LineSource(strength, x1, y1, x2, y2)])
-        update()
+def default_sink():
+    return pfv.Source(-1, 0, 0)
 
 
-with cylinder:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xcylinder")
-    ypos = st.number_input("y-coordinate", value=0.0, key="ycylinder")
-    speed = st.number_input("Freestream speed", value=1.0, key="speedcylinder")
-    angle = st.number_input("Angle-of-attack in degrees", value=0.0, key="angle")
-    radius = st.number_input("Cylinder radius", value=1.0, key="radiuscylinder")
-    if st.button("Add Non-rotating Cylinder"):
-        st.session_state["field"].objects.extend([pfv.Freestream(speed, angle), pfv.Doublet(radius, xpos, ypos, 0)])
-        update()
+def default_doublet():
+    return pfv.Doublet(1, 0, 0, 0)
 
 
-with rotating_cylinder:
-    xpos = st.number_input("x-coordinate", value=0.0, key="xrotatingcylinder")
-    ypos = st.number_input("y-coordinate", value=0.0, key="yrotatingcylinder")
-    speed = st.number_input("Freestream speed", value=1.0, key="speedrotatingcylinder")
-    strength = st.number_input("Vortex strength", value=1.0, key="strengthrotatingcylinder")
-    radius = st.number_input("Cylinder radius", value=1.0, key="radiusrotatingcylinder")
-    if st.button("Add Rotating Cylinder"):
-        st.session_state["field"].objects.extend(
-            [pfv.Freestream(speed, angle), pfv.Doublet(radius, xpos, ypos, 0), pfv.Vortex(strength, xpos, ypos)]
-        )
-        update()
+def default_vortex():
+    return pfv.Vortex(1, 0, 0)
+
+
+def default_linesource():
+    return pfv.LineSource(1, 0, 0, 1, 0)
+
+
+ELEMENT_DEFAULT_DICT = {
+    "Uniform": default_uniform,
+    "Source": default_source,
+    "Sink": default_sink,
+    "Doublet": default_doublet,
+    "Vortex": default_vortex,
+    "LineSource": default_linesource,
+}
+
+ELEMENT_NOTES_DICT = {
+    "Uniform": "Specify the x and y velocity components",
+    "Source": "Specify the source strength and the x and y coordinates",
+    "Sink": "Specify the sink strength and the x and y coordinates. Note that a sink is simply a source with negative strength",
+    "Doublet": "Specify the doublet strength, position and angle",
+    "Vortex": "Specify the vortex strength and position",
+    "LineSource": "Specify the source strength and the start and stop positions of the line",
+}
+
+
+with add_element:
+    object_dict = {}
+
+    key = st.selectbox("Select Flow Element", options=ELEMENT_DEFAULT_DICT.keys())
+
+    try:
+        flowobj = ELEMENT_DEFAULT_DICT[key]()
+        note = ELEMENT_NOTES_DICT[key]
+
+        st.text(note)
+
+        for key, val in flowobj.__dict__.items():
+            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{key}_{key}")
+
+        if st.button("Add ", key="add_element"):
+            st.session_state["field"].objects.extend([flowobj])
+            update()
+    except KeyError:
+        pass
+
+# with cylinder:
+#     xpos = st.number_input("x-coordinate", value=0.0, key="xcylinder")
+#     ypos = st.number_input("y-coordinate", value=0.0, key="ycylinder")
+#     speed = st.number_input("Freestream speed", value=1.0, key="speedcylinder")
+#     angle = st.number_input("Angle-of-attack in degrees", value=0.0, key="angle")
+#     radius = st.number_input("Cylinder radius", value=1.0, key="radiuscylinder")
+#     if st.button("Add Non-rotating Cylinder"):
+#         st.session_state["field"].objects.extend([pfv.Freestream(speed, angle), pfv.Doublet(radius, xpos, ypos, 0)])
+#         update()
+
+
+# with rotating_cylinder:
+#     xpos = st.number_input("x-coordinate", value=0.0, key="xrotatingcylinder")
+#     ypos = st.number_input("y-coordinate", value=0.0, key="yrotatingcylinder")
+#     speed = st.number_input("Freestream speed", value=1.0, key="speedrotatingcylinder")
+#     strength = st.number_input("Vortex strength", value=1.0, key="strengthrotatingcylinder")
+#     radius = st.number_input("Cylinder radius", value=1.0, key="radiusrotatingcylinder")
+#     if st.button("Add Rotating Cylinder"):
+#         st.session_state["field"].objects.extend(
+#             [pfv.Freestream(speed, angle), pfv.Doublet(radius, xpos, ypos, 0), pfv.Vortex(strength, xpos, ypos)]
+#         )
+#         update()
 
 
 for title, fig in st.session_state["figs"].items():
