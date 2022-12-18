@@ -11,30 +11,39 @@ import matplotlib.pyplot as plt
 import math as m
 
 import plotly as ply
-import plotly.subplots
+import plotly.express as px
 
 import potentialflowvisualizer as pfv
 from lib.flowfield import Flowfield
+
 
 #### =================== ####
 #### Session Information ####
 #### =================== ####
 # https://docs.streamlit.io/library/advanced-features/session-state
 
+COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
 
-for key, val in zip(
-    ["xmin", "xmax", "ymin", "ymax", "xsteps", "field", "update_trigger", "figs"],
-    [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, []],
-):
-    if not key in st.session_state:
-        st.session_state[key] = val
+
+def initialize_session_state():
+    for key, val in zip(
+        ["xmin", "xmax", "ymin", "ymax", "xsteps", "field", "update_trigger", "figs", "plot_objects", "colorscheme"],
+        [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, {}, True, "Viridis"],
+    ):
+        if not key in st.session_state:
+            st.session_state[key] = val
+
 
 #### ================== ####
 #### Update Information ####
 #### ================== ####
 
 
+initialize_session_state()
+
+
 def update():
+
     y_steps = int(
         st.session_state["xsteps"]
         * (st.session_state["ymax"] - st.session_state["ymin"])
@@ -43,12 +52,22 @@ def update():
     x_points = np.linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
     y_points = np.linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
-    fig1 = st.session_state["field"].draw(scalar_to_plot="potential", x_points=x_points, y_points=y_points, show=False)
+    fig1 = st.session_state["field"].draw(
+        scalar_to_plot="potential",
+        x_points=x_points,
+        y_points=y_points,
+        show=False,
+        colorscheme=st.session_state["colorscheme"],
+    )
     fig2 = st.session_state["field"].draw(
-        scalar_to_plot="streamfunction", x_points=x_points, y_points=y_points, show=False
+        scalar_to_plot="streamfunction",
+        x_points=x_points,
+        y_points=y_points,
+        show=False,
+        colorscheme=st.session_state["colorscheme"],
     )
 
-    st.session_state["figs"] = [fig1, fig2]
+    st.session_state["figs"] = {"Potential Function": fig1, "Stream Function": fig2}
 
 
 #### ================ ####
@@ -59,9 +78,11 @@ def update():
 st.sidebar.title("Potential Flow Theory Tool")
 
 ## Create button for superposition of fields
-if st.sidebar.button("Clear grid"):
+if st.sidebar.button("Clear Grid"):
     # st.session_state["grid"].clear()
     st.session_state["field"].objects = []
+    update()
+if st.sidebar.button("Update Grid"):
     update()
 
 ## General Test Cases
@@ -70,13 +91,38 @@ general, uniform, source, sink, doublet, vortex, linesource, cylinder, rotating_
 )
 
 with general:
+    st.header("Grid")
     st.session_state["xmin"] = st.number_input("xmin", value=-1.0)
     st.session_state["xmax"] = st.number_input("xmax", value=1.0)
     st.session_state["ymin"] = st.number_input("ymin", value=-1.0)
     st.session_state["ymax"] = st.number_input("ymax", value=1.0)
     st.session_state["xsteps"] = st.number_input("x-steps", value=300)
-    if st.button("Update Grid"):
-        update()
+
+    st.header("Layout")
+    st.session_state["plot_objects"] = st.checkbox("Plot flow elements", True)
+    st.session_state["colorscheme"] = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
+
+    st.text("")
+
+
+def flow_element_name(object): 
+    return str(type(object)).strip(">").strip("'").split(".")[-1]
+
+def default_uniform():
+    return pfv.Freestream(1, 0)
+
+# for element in [default_uniform]:
+#     object = default_uniform()
+#     name = flow_element_name(object)
+
+#     with st.sidebar.tabs[name]:
+#         for key, val in object.__dict__.items():
+#             object.__dict__[key] = st.number_input(f"{key}", value=val, key=f"{key}_{name}")
+
+#         if st.button(f"Add {name}", key="update"):
+#             st.session_state["field"].objects.extend([object])
+#             update()
+
 
 
 with uniform:
@@ -155,7 +201,8 @@ with rotating_cylinder:
         )
         update()
 
-for fig in st.session_state["figs"]:
+
+for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
 
 
@@ -167,61 +214,23 @@ if not len(st.session_state["field"].objects) == 0:
     with st.container():
         st.markdown("""----""")
 
-        optionlist = [
-            f"{str(i + 1)}. " + str(type(obj)).strip(">").strip("'").split(".")[-1]
-            for i, obj in enumerate(st.session_state["field"].objects)
-        ]
-        option = st.selectbox("TEST", options=optionlist)
-        # flowobj = [obj for obj in st.session_state["field"].objects if obj == option][0]
-        flowobj = [obj for obj in st.session_state["field"].objects][0]
+        st.subheader("Adjust your flow elements")
+        object_dict = {}
+        for i, object in enumerate(st.session_state["field"].objects):
+            key = f"{str(i + 1)}. " + flow_element_name(object)
+            object_dict[key] = object
 
-        if type(flowobj) == pfv.Freestream:
+        key = st.selectbox("Select Flow Element", options=object_dict.keys())
+        flowobj = object_dict[key]
 
-            u = st.number_input("Velocity x-component", value=flowobj.u, key="u_update")
-            v = st.number_input("Velocity y-component", value=flowobj.v, key="v_update")
+        for key, val in flowobj.__dict__.items():
+            flowobj.__dict__[key] = st.number_input(f"{key}", value=val, key=f"{key}_update")
 
-            if st.button("Update", key="tmp3"):
-                flowobj.u = float(u)
-                flowobj.v = float(v)
+        if st.button("Update", key="update"):
+            update()
 
-                update()
-
-        if type(flowobj) == pfv.Source:
-            xpos = st.number_input("x-coordinate", value=flowobj.x, key="x_update")
-            ypos = st.number_input("y-coordinate", value=flowobj.y, key="y_update")
-            strength = st.number_input("Source strength", value=flowobj.strength, key="strength_update")
-
-            if st.button("Update", key="tmp3"):
-                flowobj.x = float(xpos)
-                flowobj.y = float(ypos)
-                flowobj.strength = float(strength)
-
-                update()
-
-        if type(flowobj) == pfv.Doublet:
-            xpos = st.number_input("x-coordinate", value=flowobj.x, key="x_update")
-            ypos = st.number_input("y-coordinate", value=flowobj.y, key="y_update")
-            strength = st.number_input("Source strength", value=flowobj.strength, key="strength_update")
-            alpha = st.number_input("Doublet angle", value=flowobj.alpha, key="update_alphadoublet")
-
-            if st.button("Update", key="tmp3"):
-                flowobj.x = float(xpos)
-                flowobj.y = float(ypos)
-                flowobj.strength = float(strength)
-                flowobj.alpha = float(alpha)
-
-                update()
-
-        if type(flowobj) == pfv.Vortex:
-            xpos = st.number_input("x-coordinate", value=flowobj.x, key="x_update")
-            ypos = st.number_input("y-coordinate", value=flowobj.y, key="y_update")
-            strength = st.number_input("Source strength", value=flowobj.strength, key="strength_update")
-
-            if st.button("Update", key="tmp3"):
-                flowobj.x = float(xpos)
-                flowobj.y = float(ypos)
-                flowobj.strength = float(strength)
-
-                update()
+        if st.button("Remove", key="remove"):
+            st.session_state["field"].objects.remove(flowobj)
+            update()
 
         st.markdown("""----""")
