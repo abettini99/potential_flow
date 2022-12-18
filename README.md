@@ -1,15 +1,15 @@
-# AE2130-I - Potential Flow Tool 
+# AE2130-I - Potential Flow Tool
 
 This tool is meant to help visualize potential flow theory using an intuitive interface. It was developed for the introductory aerodynamics course AE2130-I at Delft University of Technology.
 
 
 ## How to use
-You can launch a web instance of the application through [this link](https://abettini99-potential-flow-tool.streamlit.app/). If the application hasn't been used in a while, the booting proces might take several minutes.
+You can launch a web instance of the application through [this link](https://ae2130i-potential-flow-tool.streamlit.app/). If the application hasn't been used in a while, the booting process might take several minutes.
 
 The functionality is very straigtforward:
 * Use the `Clear Grid` and `Update Grid` buttons to remove or update all flow elements
 * Use the `Grid` tab to change the domain and mesh to compute the field
-* Use the `Layout` tab to adjust the looks of the output 
+* Use the `Layout` tab to adjust the looks of the output
 * Add individual flow elements in the `Add Flow Element` tab
 * Add Pre-defined combinations of elements in the `Add Preset` tab
 
@@ -56,5 +56,3 @@ This will output a localhost window on your browser.
 ## Contribute
 
 If you wish to contribute and help make this app better and more useful, don't hesitate to do so.
-
-
