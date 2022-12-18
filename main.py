@@ -8,6 +8,7 @@ from PIL import Image
 import lib.utils as utils
 import streamlit as st
 import matplotlib.pyplot as plt
+import math as m
 
 #### =================== ####
 #### Session Information ####
@@ -65,11 +66,13 @@ with general:
     xmax    = st.number_input("xmax", value=1.)
     ymin    = st.number_input("ymin", value=-1.)
     ymax    = st.number_input("ymax", value=1.)
-    Nx      = st.number_input("Number of cells in x-direction", value=61)
-    Ny      = st.number_input("Number of cells in y-direction", value=61)
+    Nx      = 61 # st.number_input("Number of cells in x-direction", value=61)
+    Ny      = 61 # st.number_input("Number of cells in y-direction", value=61)
     if st.button("Update Grid"):
         st.session_state['grid'].update_general( (xmin,xmax), (ymin,ymax), (Nx,Ny) )
         st.session_state['update_trigger'] = True
+
+
 
 with uniform:
     speed       = st.number_input("Freestream speed", value=1.)
@@ -129,7 +132,6 @@ with rotating_cylinder:
         st.session_state['grid'].add_RotatingCylinder( speed, strength, radius, (xpos,ypos))
         st.session_state['update_trigger'] = True
 
-
 #### ================== ####
 #### Update Information ####
 #### ================== ####
@@ -171,6 +173,71 @@ if st.session_state['update_trigger']:
     ## Remove update trigger at the end of update
     st.session_state['update_trigger'] = False
 
+
 # st.text(st.session_state['path']  + '\images\streamline_potential.png')
 image = Image.open('images\streamline_potential.png')
 st.image(image, use_column_width = True)
+
+## Do a super-hack:
+## I would normally not do the redundant line of making option = flowobj
+## but it seems that option is a session-state variable, and not the actual grid object itself
+## therefore you cannot modify option, but can modify flowobj
+if not len(st.session_state['grid'].flowlist) == 0:
+    with st.container():
+        st.markdown("""----""")
+
+        option = st.selectbox("TEST", options=st.session_state['grid'].flowlist)
+        flowobj = [obj for obj in st.session_state['grid'].flowlist if obj == option][0]
+
+        if flowobj.type == 'Uniform':
+            speed       = st.number_input("Freestream speed", value=flowobj.Vinfty, key='speed_update')
+            angle       = st.number_input("Angle-of-attack in degrees", value=flowobj.angle, key='angle_update')
+
+            if st.button("Update",key='tmp3'):
+                flowobj.Vinfty = float(speed)
+                flowobj.angle = float(angle)
+
+                st.session_state['update_trigger'] = True
+
+        if flowobj.type == 'Source':
+            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+            if st.button("Update",key='tmp3'):
+                flowobj.position = (float(xpos),float(ypos))
+                flowobj.x0 = float(xpos)
+                flowobj.y0 = float(ypos)
+                flowobj.strength = float(strength)
+
+                st.session_state['update_trigger'] = True
+
+        if flowobj.type == 'Doublet':
+            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+            if st.button("Update",key='tmp3'):
+                flowobj.position = (float(xpos),float(ypos))
+                flowobj.x0 = float(xpos)
+                flowobj.y0 = float(ypos)
+                flowobj.strength = float(strength)
+
+                st.session_state['update_trigger'] = True
+
+        if flowobj.type == 'Vortex':
+            xpos        = st.number_input("x-coordinate", value=flowobj.x0, key='x_update')
+            ypos        = st.number_input("y-coordinate", value=flowobj.y0, key='y_update')
+            strength    = st.number_input("Source strength", value=flowobj.strength, key='strength_update')
+
+            if st.button("Update",key='tmp3'):
+                flowobj.position = (float(xpos),float(ypos))
+                flowobj.x0 = float(xpos)
+                flowobj.y0 = float(ypos)
+                flowobj.strength = float(strength)
+
+                st.session_state['update_trigger'] = True
+
+        st.markdown("""----""")
+        
+st.write("This is outside the container")
