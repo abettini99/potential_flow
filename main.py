@@ -41,31 +41,37 @@ ELEMENT_DEFAULT_DICT = {
 
 
 def flow_element_type(object):
-    name = TYPE_NAME_DICT[object.__class__]
+    try:
+        name = TYPE_NAME_DICT[object.__class__]
+    except KeyError:
+        raise ValueError("The given object is not a flow element")
+        
     if name == "Source" and object.strength < 0:
         name = "Sink"
     return name
 
 
 def initialize_session_state():
-    for key, val in [
-            [ "xmin", -1.0 ],
-            [ "xmax", 1.0 ],
-            [ "ymin", -1.0 ],
-            [ "ymax", 1.0 ],
-            [ "xsteps", 300 ],
-            [ "field", Flowfield() ],
-            [ "update_trigger", False ],
-            [ "figs", {} ],
-            [ "plot_objects",True  ],
-            [ "colorscheme", "Viridis" ],
-            [ "n_contour_lines", 40 ],
-            [ "show_potential", True ],
-            [ "show_streamfunction", True ],
-            [ "show_xvel", False ],
-            [ "show_yvel", False ],
-            [ "show_velmag", False ],
-    ]:
+    default_dict = {
+        "xmin": -1.0,
+        "xmax": 1.0,
+        "ymin": -1.0,
+        "ymax": 1.0,
+        "xsteps": 300,
+        "field": Flowfield(),
+        "update_trigger": False,
+        "figs": {},
+        "plot_objects": True,
+        "colorscheme": "Viridis",
+        "n_contour_lines": 40,
+        "show_potential": True,
+        "show_streamfunction": True,
+        "show_xvel": False,
+        "show_yvel": False,
+        "show_velmag": False,
+    }
+
+    for key, val in default_dict.items():
         if not key in st.session_state:
             st.session_state[key] = val
 
@@ -124,16 +130,16 @@ st.markdown(footer, unsafe_allow_html=True)
 
 
 ## Buttons to clear and update in sidebar
-if st.sidebar.button("Clear Grid"):
+if st.sidebar.button("Clear Flow"):
     st.session_state["field"].objects = []
     update()
 
-if st.sidebar.button("Update Grid"):
+if st.sidebar.button("Update Flow"):
     update()
 
 ## Create sidebar tabs
 welcome, grid, layout, add_element, presets = st.sidebar.tabs(
-    ["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"]
+    ["Welcome", "Grid", "Layout", "Add Flow Element", "Generic Flows"]
 )
 
 with welcome:
