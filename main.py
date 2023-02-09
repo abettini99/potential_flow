@@ -7,7 +7,7 @@ from numpy import deg2rad, linspace
 import streamlit as st
 import plotly.express as px
 import potentialflowvisualizer as pfv
-from flowfield import Flowfield
+from src.flowfield import Flowfield
 import copy
 
 
@@ -16,7 +16,6 @@ import copy
 #### =================== ####
 
 COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
-
 
 TYPE_NAME_DICT = {
     pfv.Freestream: "Uniform",
@@ -49,30 +48,26 @@ def flow_element_type(object):
 
 
 def initialize_session_state():
-    for key, val in zip(
-        [
-            "xmin",
-            "xmax",
-            "ymin",
-            "ymax",
-            "xsteps",
-            "field",
-            "update_trigger",
-            "figs",
-            "plot_objects",
-            "colorscheme",
-            "n_contour_lines",
-            "show_potential",
-            "show_streamfunction",
-            "show_xvel",
-            "show_yvel",
-            "show_velmag",
-        ],
-        [-1.0, 1.0, -1.0, 1.0, 300, Flowfield(), False, {}, True, "Viridis", 40, True, True, False, False, False],
-    ):
+    for key, val in [
+            [ "xmin", -1.0 ],
+            [ "xmax", 1.0 ],
+            [ "ymin", -1.0 ],
+            [ "ymax", 1.0 ],
+            [ "xsteps", 300 ],
+            [ "field", Flowfield() ],
+            [ "update_trigger", False ],
+            [ "figs", {} ],
+            [ "plot_objects",True  ],
+            [ "colorscheme", "Viridis" ],
+            [ "n_contour_lines", 40 ],
+            [ "show_potential", True ],
+            [ "show_streamfunction", True ],
+            [ "show_xvel", False ],
+            [ "show_yvel", False ],
+            [ "show_velmag", False ],
+    ]:
         if not key in st.session_state:
             st.session_state[key] = val
-
 
 initialize_session_state()
 
@@ -120,7 +115,7 @@ footer = """
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     footer:after {
-        content:'Made with Streamlit by Andrea Bettini and Simon Van Hulle'; 
+        content:'Made with Streamlit by Andrea Bettini and Simon Van Hulle';
         visibility: visible;display: block;position: relative;#background-color: red;padding: 5px;top: 2px;
     }
 </style>
@@ -148,22 +143,22 @@ with welcome:
 
 with grid:
     st.header("Grid")
-    st.session_state["xmin"] = st.number_input("xmin", value=-1.0)
-    st.session_state["xmax"] = st.number_input("xmax", value=1.0)
-    st.session_state["ymin"] = st.number_input("ymin", value=-1.0)
-    st.session_state["ymax"] = st.number_input("ymax", value=1.0)
-    st.session_state["xsteps"] = st.number_input("x-steps on the grid", value=300)
+    st.session_state["xmin"]    = st.number_input("xmin", value=-1.0)
+    st.session_state["xmax"]    = st.number_input("xmax", value=1.0)
+    st.session_state["ymin"]    = st.number_input("ymin", value=-1.0)
+    st.session_state["ymax"]    = st.number_input("ymax", value=1.0)
+    st.session_state["xsteps"]  = st.number_input("x-steps on the grid", value=300)
 
 with layout:
     st.header("Layout")
-    st.session_state["plot_objects"] = st.checkbox("Plot flow objects", True)
-    st.session_state["show_potential"] = st.checkbox("Plot the potential", True)
+    st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
+    st.session_state["show_potential"]      = st.checkbox("Plot the potential", True)
     st.session_state["show_streamfunction"] = st.checkbox("Plot the stream function", True)
-    st.session_state["show_xvel"] = st.checkbox("Plot the x velocity", False)
-    st.session_state["show_yvel"] = st.checkbox("Plot the y velocity", False)
-    st.session_state["show_velmag"] = st.checkbox("Plot the velocity magnitude", False)
-    st.session_state["colorscheme"] = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
-    st.session_state["n_contour_lines"] = st.number_input("Number of contour lines", value=40)
+    st.session_state["show_xvel"]           = st.checkbox("Plot the x velocity", False)
+    st.session_state["show_yvel"]           = st.checkbox("Plot the y velocity", False)
+    st.session_state["show_velmag"]         = st.checkbox("Plot the velocity magnitude", False)
+    st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
+    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=40)
 
 
 def adjust_objects(objects, id=None):
