@@ -110,8 +110,6 @@ def update():
 #### Main application ####
 #### ================ ####
 
-st.sidebar.image("images/TU_Delft_Logo.png", width=200)
-
 ## App title
 st.sidebar.title("Potential Flow Tool")
 
@@ -140,8 +138,8 @@ with sb_col2:
         update()
 
 ## Create sidebar tabs
-welcome, grid, layout, add_element, presets = st.sidebar.tabs(
-    ["Welcome", "Grid", "Layout", "Add Flow Element", "Generic Flows"]
+welcome, graphing, add_element, presets = st.sidebar.tabs(
+    ["Welcome", "Graphing", "Add Flow Element", "Generic Flows"]
 )
 
 with welcome:
@@ -150,7 +148,10 @@ with welcome:
         text = text.split("---")
     st.markdown(text[0] +"---"+ text[2])
 
-with grid:
+    ## TUD logo at bottom of sidebar
+    st.image("images/TU_Delft_Logo.png", width=200)
+
+with graphing:
     st.header("Grid")
     st.session_state["xmin"]    = st.number_input("xmin", value=-1.0)
     st.session_state["xmax"]    = st.number_input("xmax", value=1.0)
@@ -158,7 +159,8 @@ with grid:
     st.session_state["ymax"]    = st.number_input("ymax", value=1.0)
     st.session_state["xsteps"]  = st.number_input("x-steps on the grid", value=300)
 
-with layout:
+    st.markdown("""----""")
+    
     st.header("Layout")
     st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
     st.session_state["show_potential"]      = st.checkbox("Plot the potential", True)
