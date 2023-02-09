@@ -130,12 +130,12 @@ st.markdown(footer, unsafe_allow_html=True)
 
 
 ## Buttons to clear and update in sidebar
-col1, col2 = st.sidebar.columns([1,1])
-with col1:
+sb_col1, sb_col2 = st.sidebar.columns([1,1]) # sb = sidebar
+with sb_col1:
     if st.button("Clear Flow"):
         st.session_state["field"].objects = []
         update()
-with col2:
+with sb_col2:
     if st.button("Update Flow"):
         update()
 
@@ -147,7 +147,8 @@ welcome, grid, layout, add_element, presets = st.sidebar.tabs(
 with welcome:
     with open("README.md", "r") as ifstream:
         text = ifstream.read()
-    st.markdown(text)
+        text = text.split("---")
+    st.markdown(text[0] +"---"+ text[2])
 
 with grid:
     st.header("Grid")
@@ -221,7 +222,6 @@ for title, fig in st.session_state["figs"].items():
 ## Adjust the flow elemetns
 if not len(st.session_state["field"].objects) == 0:
     st.markdown("""----""")
-
     st.subheader("Adjust your flow elements")
 
     dropdown_dict = {}
@@ -237,13 +237,16 @@ if not len(st.session_state["field"].objects) == 0:
 
     name = adjust_objects([flowobj], "adjust")
 
-    if st.button("Update", key="update"):
-        update()
 
-    if st.button("Remove", key="remove"):
-        print(st.session_state["field"].objects)
-        print(flowobj)
-        st.session_state["field"].objects.remove(flowobj)
-        update()
+    ae_col1, ae_col2 = st.columns([1,1]) # ae = adjust element
+    with ae_col1:
+        if st.button("Update Flow", key="update"):
+            update()
+    with ae_col2:
+        if st.button("Remove Flow", key="remove"):
+            print(st.session_state["field"].objects)
+            print(flowobj)
+            st.session_state["field"].objects.remove(flowobj)
+            update()
 
     st.markdown("""----""")
