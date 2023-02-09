@@ -45,7 +45,7 @@ def flow_element_type(object):
         name = TYPE_NAME_DICT[object.__class__]
     except KeyError:
         raise ValueError("The given object is not a flow element")
-        
+
     if name == "Source" and object.strength < 0:
         name = "Sink"
     return name
@@ -110,7 +110,7 @@ def update():
 #### Main application ####
 #### ================ ####
 
-st.sidebar.image("images/TU_Delft_Logo.png", width=100)
+st.sidebar.image("images/TU_Delft_Logo.png", width=200)
 
 ## App title
 st.sidebar.title("Potential Flow Tool")
@@ -130,12 +130,14 @@ st.markdown(footer, unsafe_allow_html=True)
 
 
 ## Buttons to clear and update in sidebar
-if st.sidebar.button("Clear Flow"):
-    st.session_state["field"].objects = []
-    update()
-
-if st.sidebar.button("Update Flow"):
-    update()
+col1, col2 = st.sidebar.columns([1,1])
+with col1:
+    if st.button("Clear Flow"):
+        st.session_state["field"].objects = []
+        update()
+with col2:
+    if st.button("Update Flow"):
+        update()
 
 ## Create sidebar tabs
 welcome, grid, layout, add_element, presets = st.sidebar.tabs(
