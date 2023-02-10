@@ -8,8 +8,7 @@ You can launch a web instance of the application through [this link](https://ae2
 
 The functionality is very straightforward:
 * Use the `Clear Flow` and `Update Flow` buttons to remove or update all flow elements.
-* Use the `Grid` tab to change the domain and mesh to compute the field.
-* Use the `Layout` tab to adjust the looks of the output.
+* Use the `Graphing` tab to change the domain and mesh of the plots, and to adjust the looks of the plots.
 * Add individual flow elements in the `Add Flow Element` tab.
 * Add Pre-defined combinations of elements in the `Add Generic Flows` tab.
 * Below the plots, a dropdown menu will allow you to adjust previously added flow elements.
