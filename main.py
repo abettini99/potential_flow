@@ -18,24 +18,24 @@ import copy
 COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
 
 TYPE_NAME_DICT = {
-    pfv.Freestream: "Uniform",
-    pfv.Source: "Source",
-    pfv.Doublet: "Doublet",
-    pfv.Vortex: "Vortex",
-    pfv.LineSource: "LineSource",
+    pfv.Freestream  : "Uniform",
+    pfv.Source      : "Source",
+    pfv.Doublet     : "Doublet",
+    pfv.Vortex      : "Vortex",
+    pfv.LineSource  : "LineSource",
 }
 
 PRESET_DICT = {
-    "Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0)],
-    "Rotating Cylinder": [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0), pfv.Vortex(1, 0, 0)],
+    "Cylinder"          : [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0)],
+    "Rotating Cylinder" : [pfv.Freestream(1, 0), pfv.Doublet(1, 0, 0, 0), pfv.Vortex(1, 0, 0)],
 }
 
 ELEMENT_DEFAULT_DICT = {
-    "Uniform": pfv.Freestream(1, 0),
-    "Source": pfv.Source(1, 0, 0),
-    "Sink": pfv.Source(-1, 0, 0),
-    "Doublet": pfv.Doublet(1, 0, 0, 0),
-    "Vortex": pfv.Vortex(1, 0, 0),
+    "Uniform"   : pfv.Freestream(1, 0),
+    "Source"    : pfv.Source(1, 0, 0),
+    "Sink"      : pfv.Source(-1, 0, 0),
+    "Doublet"   : pfv.Doublet(1, 0, 0, 0),
+    "Vortex"    : pfv.Vortex(1, 0, 0),
     "LineSource": pfv.LineSource(1, 0, 0, 1, 0),
 }
 
@@ -48,6 +48,7 @@ def flow_element_type(object):
 
     if name == "Source" and object.strength < 0:
         name = "Sink"
+
     return name
 
 
@@ -75,6 +76,8 @@ def initialize_session_state():
         if not key in st.session_state:
             st.session_state[key] = val
 
+    return
+
 initialize_session_state()
 
 #### ================== ####
@@ -83,7 +86,6 @@ initialize_session_state()
 
 
 def update():
-
     y_steps = int(
         st.session_state["xsteps"]
         * (st.session_state["ymax"] - st.session_state["ymin"])
@@ -93,7 +95,6 @@ def update():
     y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
     for name in ["potential", "streamfunction", "xvel", "yvel", "velmag"]:
-
         if st.session_state[f"show_{name}"]:
             st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
                 scalar_to_plot=name,
@@ -105,6 +106,7 @@ def update():
                 plot_flow_elements=st.session_state["plot_objects"],
             )
 
+    return
 
 #### ================ ####
 #### Main application ####
@@ -160,7 +162,7 @@ with graphing:
     st.session_state["xsteps"]  = st.number_input("x-steps on the grid", value=300)
 
     st.markdown("""----""")
-    
+
     st.header("Layout")
     st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
     st.session_state["show_potential"]      = st.checkbox("Plot the potential", True)
@@ -174,10 +176,11 @@ with graphing:
 
 def adjust_objects(objects, id=None):
     for flowobj in objects:
-
+        st.markdown("""----""")
+        if id == "preset":
+            st.subheader(flow_element_type(obj))
         for key, val in flowobj.__dict__.items():
             flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
-
     return
 
 
@@ -186,9 +189,7 @@ with add_element:
 
     try:
         flowobj = copy.deepcopy(ELEMENT_DEFAULT_DICT[key])
-
-        name = adjust_objects([flowobj], "element")
-
+        name    = adjust_objects([flowobj], "element")
         if st.button("Add ", key="add_element"):
             st.session_state["field"].objects.extend([flowobj])
             update()
@@ -197,13 +198,11 @@ with add_element:
         pass
 
 with presets:
-
     key = st.selectbox("Select Preset", options=PRESET_DICT.keys())
+
     try:
         objects = PRESET_DICT[key]
-
         for i, obj in enumerate(objects):
-            st.subheader(flow_element_type(obj))
             name = adjust_objects([obj], "preset")
 
         if st.button("Add ", key="add_preset"):
@@ -213,13 +212,11 @@ with presets:
     except KeyError:
         pass
 
-
 ## Plot the figures
 if st.session_state["figs"]:
     st.subheader("Contour Plots")
 for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
-
 
 ## Adjust the flow elemetns
 if not len(st.session_state["field"].objects) == 0:
@@ -230,15 +227,9 @@ if not len(st.session_state["field"].objects) == 0:
     for i, obj in enumerate(st.session_state["field"].objects):
         dropdown_dict[f"{i + 1}. [{flow_element_type(obj)}]"] = obj
 
-    key = st.selectbox(
-        "Select Flow Element",
-        options=dropdown_dict.keys(),
-    )
-
+    key     = st.selectbox("Select Flow Element", options=dropdown_dict.keys())
     flowobj = dropdown_dict[key]
-
-    name = adjust_objects([flowobj], "adjust")
-
+    name    = adjust_objects([flowobj], "adjust")
 
     ae_col1, ae_col2 = st.columns([1,1]) # ae = adjust element
     with ae_col1:
