@@ -64,7 +64,7 @@ def initialize_session_state():
         "figs": {},
         "plot_objects": True,
         "colorscheme": "Viridis",
-        "n_contour_lines": 40,
+        "n_contour_lines": 15,
         "show_potential": True,
         "show_streamfunction": True,
         "show_xvel": False,
@@ -171,7 +171,7 @@ with graphing:
     st.session_state["show_yvel"]           = st.checkbox("Plot the y velocity", False)
     st.session_state["show_velmag"]         = st.checkbox("Plot the velocity magnitude", False)
     st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
-    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=40)
+    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
 
 
 def adjust_objects(objects, id=None):

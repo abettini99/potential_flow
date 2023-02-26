@@ -84,21 +84,34 @@ class Flowfield:
         if scalar_to_plot == "velmag":
             scalar_to_plot_value = np.sqrt(x_vels**2 + y_vels**2)
 
-        min = np.nanpercentile(scalar_to_plot_value, 10)
-        max = np.nanpercentile(scalar_to_plot_value, 90)
+        min = np.nanpercentile(scalar_to_plot_value, 5)
+        max = np.nanpercentile(scalar_to_plot_value, 95)
 
         fig = go.Figure()
         if min == max:
             return fig
 
+        # https://stackoverflow.com/questions/68081450/how-to-create-discrete-colormap-with-n-colors-using-plotly
+        # n_colors = 15
+        # colors = px.colors.sample_colorscale(colorscheme, [n/(n_colors -1) for n in range(n_colors)])
+
         fig.add_trace(
-            go.Contour(
+            go.Contour( ## https://plotly.github.io/plotly.py-docs/generated/plotly.graph_objects.Contour.html
                 x=x_points,
                 y=y_points,
                 z=np.reshape(scalar_to_plot_value, X.shape),
                 colorscale=colorscheme,
-                contours=dict(start=min, end=max, size=(max - min) / n_contour_lines),
-                colorbar=dict(title=LONG_NAME_DICT[scalar_to_plot], titleside="top", ticks="outside"),
+                contours=dict(start=min,
+                              end=max,
+                              size=(max - min) / n_contour_lines,
+                              ), ## https://plotly.com/python/contour-plots/
+                colorbar=dict(title     =LONG_NAME_DICT[scalar_to_plot],
+                              titleside = "right",
+                              ticks     = "inside",
+                              len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                              ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
+                              tickwidth = 2,
+                              ticklen   = 10),
             ),
         )
 
@@ -108,7 +121,8 @@ class Flowfield:
                     go.Scatter(
                         x=[object.x],
                         y=[object.y],
-                        marker=dict(color=line_color(object), size=dot_size(object)),
+                        marker=dict(color=line_color(object),
+                                    size=dot_size(object)),
                         showlegend=False,
                     )
                 )
@@ -120,7 +134,8 @@ class Flowfield:
                     go.Line(
                         x=[object.x1, object.x2],
                         y=[object.y1, object.y2],
-                        line=dict(color=line_color(object), width=line_width(object)),
+                        line=dict(color=line_color(object),
+                                  width=line_width(object)),
                         showlegend=False,
                     )
                 )
@@ -129,6 +144,11 @@ class Flowfield:
 
         # fig.update_layout(yaxis=dict(scaleanchor="x", scaleratio=1))
         if show:
+            fig.update_layout(
+                autosize=False,
+                width=500,
+                height=500,
+            )
             fig.show()
 
         return fig
