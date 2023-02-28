@@ -2,10 +2,31 @@ import numpy as np
 import plotly as ply
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.subplots import make_subplots
+import potentialflowvisualizer as pfv
 
 pio.renderers.default = (
     "browser"  # Feel free to disable this if you're running in notebook mode or prefer a different frontend.
 )
+
+TYPE_NAME_DICT = {
+    pfv.Freestream  : "Uniform",
+    pfv.Source      : "Source",
+    pfv.Doublet     : "Doublet",
+    pfv.Vortex      : "Vortex",
+    pfv.LineSource  : "LineSource",
+}
+
+def flow_element_type(object):
+    try:
+        name = TYPE_NAME_DICT[object.__class__]
+    except KeyError:
+        raise ValueError("The given object is not a flow element")
+
+    if name == "Source" and object.strength < 0:
+        name = "Sink"
+
+    return name
 
 LONG_NAME_DICT = {
     "potential": "Velocity Potential",
@@ -64,8 +85,9 @@ class Flowfield:
 
         scalar_to_plot_value = np.zeros_like(X_r)
         if scalar_to_plot == "velmag":
-            x_vels = np.zeros_like(X_r)
-            y_vels = np.zeros_like(X_r)
+            x_vels          = np.zeros_like(X_r)
+            y_vels          = np.zeros_like(X_r)
+            streamfunction  = np.zeros_like(X_r)
         for object in self.objects:
             if scalar_to_plot == "potential":
                 scalar_to_plot_value += object.get_potential_at(points)
@@ -78,77 +100,179 @@ class Flowfield:
             elif scalar_to_plot == "velmag":
                 x_vels += object.get_x_velocity_at(points)
                 y_vels += object.get_y_velocity_at(points)
+
+                streamfunction += object.get_streamfunction_at(points)
+                scalar_to_plot_value = np.sqrt(x_vels**2 + y_vels**2)
+
+                min2 = np.nanpercentile(streamfunction, 5)
+                max2 = np.nanpercentile(streamfunction, 95)
             else:
                 raise Exception
-
-        if scalar_to_plot == "velmag":
-            scalar_to_plot_value = np.sqrt(x_vels**2 + y_vels**2)
 
         min = np.nanpercentile(scalar_to_plot_value, 5)
         max = np.nanpercentile(scalar_to_plot_value, 95)
 
-        fig = go.Figure()
+        fig = make_subplots(rows=1, cols=1,
+                            subplot_titles=(LONG_NAME_DICT[scalar_to_plot],)
+                           )
         if min == max:
             return fig
 
-        # https://stackoverflow.com/questions/68081450/how-to-create-discrete-colormap-with-n-colors-using-plotly
-        # n_colors = 15
-        # colors = px.colors.sample_colorscale(colorscheme, [n/(n_colors -1) for n in range(n_colors)])
+        if scalar_to_plot == "velmag":
+                fig.add_trace(go.Contour(name=LONG_NAME_DICT[scalar_to_plot],
+                                         x=x_points, y=y_points, z=np.reshape(scalar_to_plot_value, X.shape),
+                                         colorscale=colorscheme,
+                                         contours=dict(start=min,
+                                                       end=max,
+                                                       size=(max - min) / n_contour_lines,
+                                                      ),
+                                         contours_showlines=False,
+                                         showscale=False,
+                                         hovertemplate='x = %{x:.4f}'+
+                                                       '<br>y = %{y:.4f}'+
+                                                       '<br>f(x,y) = %{z:.4e}'+
+                                                       '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
+                                         # colorbar=dict(ticks     = "inside",
+                                         #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                         #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
+                                         #               tickwidth = 2,
+                                         #               ticklen   = 10
+                                         #              ),
+                                        ),
+                              row=1, col=1
+                             )
+                fig.add_trace(go.Contour(x=x_points, y=y_points, z=np.reshape(streamfunction, X.shape),
+                             colorscale=[[0,'#000000'],[1,'#000000']],
+                             contours=dict(start=min2,
+                                           end=max2,
+                                           size=(max2 - min2) / n_contour_lines,
+                                          ),
+                             showscale=False,
+                             contours_coloring='lines',
+                             hoverinfo='skip'
+                            ),
+                  row=1, col=1
+                 )
+        else:
+                fig.add_trace(go.Contour(name=LONG_NAME_DICT[scalar_to_plot],
+                                         x=x_points, y=y_points, z=np.reshape(scalar_to_plot_value, X.shape),
+                                         colorscale=colorscheme,
+                                         contours=dict(start=min,
+                                                       end=max,
+                                                       size=(max - min) / n_contour_lines,
+                                                      ),
+                                         showscale=False,
+                                         hovertemplate='x = %{x:.4f}'+
+                                                       '<br>y = %{y:.4f}'+
+                                                       '<br>f(x,y) = %{z:.4e}'+
+                                                       '<extra></extra>',
+                                         # colorbar=dict(ticks     = "inside",
+                                         #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                         #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
+                                         #               tickwidth = 2,
+                                         #               ticklen   = 10
+                                         #              ),
+                                        ),
+                              row=1, col=1
+                             )
 
-        fig.add_trace(
-            go.Contour( ## https://plotly.github.io/plotly.py-docs/generated/plotly.graph_objects.Contour.html
-                x=x_points,
-                y=y_points,
-                z=np.reshape(scalar_to_plot_value, X.shape),
-                colorscale=colorscheme,
-                contours=dict(start=min,
-                              end=max,
-                              size=(max - min) / n_contour_lines,
-                              ), ## https://plotly.com/python/contour-plots/
-                colorbar=dict(title     =LONG_NAME_DICT[scalar_to_plot],
-                              titleside = "right",
-                              ticks     = "inside",
-                              len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
-                              ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
-                              tickwidth = 2,
-                              ticklen   = 10),
-            ),
-        )
+        if plot_flow_elements:
+            for i, object in enumerate(self.objects):
+                try:
+                    fig.add_trace(go.Scatter(name=f"{i + 1}. [{flow_element_type(object)}]",
+                                             x=[object.x], y=[object.y],
+                                             marker=dict(color=line_color(object),
+                                                         size=dot_size(object)
+                                                        ),
+                                             hovertemplate=f'<b>{i + 1}. [{flow_element_type(object)}]</b>'+
+                                                           '<br>x = %{x:.4f}'+
+                                                           '<br>y = %{y:.4f}'+
+                                                           f'<br>strength = {object.strength:.4e}'+
+                                                           '<br>%{text}'
+                                                           '<extra></extra>',
+                                                           text = [f'alpha = {object.alpha:.4e}' if flow_element_type(object) == "Doublet" else ''],
+                                            ),
+                                  row=1, col=1
+                                 )
+                except AttributeError:
+                    pass
 
-        for object in self.objects if plot_flow_elements else []:
-            try:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[object.x],
-                        y=[object.y],
-                        marker=dict(color=line_color(object),
-                                    size=dot_size(object)),
-                        showlegend=False,
-                    )
-                )
-            except AttributeError:
-                pass
-
-            try:
-                fig.add_trace(
-                    go.Line(
-                        x=[object.x1, object.x2],
-                        y=[object.y1, object.y2],
-                        line=dict(color=line_color(object),
-                                  width=line_width(object)),
-                        showlegend=False,
-                    )
-                )
-            except AttributeError:
-                pass
+                try:
+                    fig.add_trace(go.Line(name=f"{i + 1}. [{flow_element_type(object)}]",
+                                          x=[object.x1, object.x2], y=[object.y1, object.y2],
+                                          line=dict(color=line_color(object),
+                                                    width=line_width(object)
+                                                   ),
+                                          hovertemplate=f'<b>{i + 1}. [{flow_element_type(object)}]</b>'+
+                                                        '<br>x = %{x:.4f}'+
+                                                        '<br>y = %{y:.4f}'+
+                                                        f'<br>strength = {object.strength:.4e}'+
+                                                        '<extra></extra>',
+                                         ),
+                                  row=1, col=1
+                                 )
+                except AttributeError:
+                    pass
 
         # fig.update_layout(yaxis=dict(scaleanchor="x", scaleratio=1))
+
+        fig.update_xaxes(title_text='x',
+                         title_font_color='#000000',
+                         title_standoff=0,
+                         gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB
+                         gridwidth=1,
+                         zerolinecolor='#000000',
+                         zerolinewidth=2,
+                         linecolor='#000000',
+                         linewidth=1,
+                         ticks='outside',
+                         ticklen=10,
+                         tickwidth=2,
+                         tickcolor='#000000',
+                         tickfont_color='#000000',
+                         minor_showgrid=True,
+                         minor_gridcolor='rgba(221, 221, 221, 0.50)', #DDDDDD in RGB, 0.50 opacity
+                         minor_ticks='outside',
+                         minor_ticklen=5,
+                         minor_tickwidth=2,
+                         minor_griddash='dot',
+                         hoverformat='.4f',
+                         range=[x_points.min(),x_points.max()],
+                        )
+
+        fig.update_yaxes(title_text='y',
+                         title_font_color='#000000',
+                         title_standoff=0,
+                         gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB, 0.75 opacity
+                         gridwidth=1,
+                         zerolinecolor='#000000',
+                         zerolinewidth=2,
+                         linecolor='#000000',
+                         linewidth=1,
+                         ticks='outside',
+                         ticklen=10,
+                         tickwidth=2,
+                         tickcolor='#000000',
+                         tickfont_color='#000000',
+                         minor_showgrid=True,
+                         minor_gridcolor='rgba(221, 221, 221, 0.50)', #DDDDDD in RGB, 0.50 opacity
+                         minor_ticks='outside',
+                         minor_ticklen=5,
+                         minor_tickwidth=2,
+                         minor_griddash='dot',
+                         range=[y_points.min(),y_points.max()],
+                        )
+
+        fig.update_layout(font_color='#000000',
+                          plot_bgcolor='rgba(255,255,255,1)',
+                          paper_bgcolor='rgba(255,255,255,1)',
+                          autosize=False,
+                          width=800,
+                          height=800,
+                          showlegend=False,
+                         )
+
         if show:
-            fig.update_layout(
-                autosize=False,
-                width=500,
-                height=500,
-            )
             fig.show()
 
         return fig

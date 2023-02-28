@@ -65,11 +65,13 @@ def initialize_session_state():
         "plot_objects": True,
         "colorscheme": "Viridis",
         "n_contour_lines": 15,
-        "show_potential": True,
-        "show_streamfunction": True,
+        "show_potential": False,
+        "show_streamfunction": False,
+        "show_velmag": True,
+        "show_pressure": True,
         "show_xvel": False,
         "show_yvel": False,
-        "show_velmag": False,
+        "Graphing_Mode": 'Easy Mode'
     }
 
     for key, val in default_dict.items():
@@ -94,6 +96,7 @@ def update():
     x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
     y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
+    st.session_state["figs"].clear()
     for name in ["potential", "streamfunction", "xvel", "yvel", "velmag"]:
         if st.session_state[f"show_{name}"]:
             st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
@@ -154,25 +157,46 @@ with welcome:
     st.image("images/TU_Delft_Logo.png", width=200)
 
 with graphing:
-    st.header("Grid")
-    st.session_state["xmin"]    = st.number_input("xmin", value=-1.0)
-    st.session_state["xmax"]    = st.number_input("xmax", value=1.0)
-    st.session_state["ymin"]    = st.number_input("ymin", value=-1.0)
-    st.session_state["ymax"]    = st.number_input("ymax", value=1.0)
-    st.session_state["xsteps"]  = st.number_input("x-steps on the grid", value=300)
+    st.radio("Graphing Mode:",
+             key='Graphing_Mode',
+             options=['Easy Mode', 'Expert Mode'])
 
     st.markdown("""----""")
+    if st.session_state["Graphing_Mode"] == 'Easy Mode':
+        st.session_state["plot_objects"]        = True
+        st.session_state["show_potential"]      = False
+        st.session_state["show_streamfunction"] = False
+        st.session_state["show_velmag"]         = True
+        st.session_state["show_pressure"]       = True
+        st.session_state["show_xvel"]           = False
+        st.session_state["show_yvel"]           = False
+        st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
+        st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
 
-    st.header("Layout")
-    st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
-    st.session_state["show_potential"]      = st.checkbox("Plot the potential", True)
-    st.session_state["show_streamfunction"] = st.checkbox("Plot the stream function", True)
-    st.session_state["show_xvel"]           = st.checkbox("Plot the x velocity", False)
-    st.session_state["show_yvel"]           = st.checkbox("Plot the y velocity", False)
-    st.session_state["show_velmag"]         = st.checkbox("Plot the velocity magnitude", False)
-    st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
-    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
+        update()
 
+    if st.session_state["Graphing_Mode"] == 'Expert Mode':
+        st.header("Grid")
+        st.session_state["xmin"]    = st.number_input("x minimum", value=-1.0)
+        st.session_state["xmax"]    = st.number_input("x maximum", value=1.0)
+        st.session_state["ymin"]    = st.number_input("y minimum", value=-1.0)
+        st.session_state["ymax"]    = st.number_input("y maximum", value=1.0)
+        st.session_state["xsteps"]  = st.number_input("x-steps on the grid", value=300)
+
+        st.markdown("""----""")
+
+        st.header("Layout")
+        st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
+        st.session_state["show_potential"]      = st.checkbox("Plot the potential", True)
+        st.session_state["show_streamfunction"] = st.checkbox("Plot the stream function", True)
+        st.session_state["show_velmag"]         = st.checkbox("Plot the velocity magnitude", True)
+        st.session_state["show_pressure"]       = st.checkbox("Plot the pressure coefficient", True)
+        st.session_state["show_xvel"]           = st.checkbox("Plot the x velocity", False)
+        st.session_state["show_yvel"]           = st.checkbox("Plot the y velocity", False)
+        st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
+        st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
+
+        update()
 
 def adjust_objects(objects, id=None):
     for flowobj in objects:
