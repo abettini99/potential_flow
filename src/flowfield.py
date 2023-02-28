@@ -115,7 +115,7 @@ class Flowfield:
         fig = make_subplots(rows=1, cols=1,
                             subplot_titles=(LONG_NAME_DICT[scalar_to_plot],)
                            )
-        if min == max:
+        if len(self.objects) == 0:
             return fig
 
         if scalar_to_plot == "velmag":
