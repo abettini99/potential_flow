@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Library imports
 import numpy as np
 import plotly as ply
 import plotly.graph_objects as go
@@ -35,7 +39,7 @@ def line_width(object):
 
     return 10 + np.tanh(strength) * 10
 
-
+## FlowField Class
 class Flowfield:
     def __init__(self, objects=[]):
         self.objects = objects
@@ -55,7 +59,6 @@ class Flowfield:
         X_r     = np.reshape(X, -1)
         Y_r     = np.reshape(Y, -1)
         points  = np.vstack((X_r, Y_r)).T
-
         scalar_to_plot_value = np.zeros_like(X_r)
         if scalar_to_plot == "velmag":
             x_vels          = np.zeros_like(X_r)
@@ -79,26 +82,25 @@ class Flowfield:
             elif scalar_to_plot == "yvel":
                 scalar_to_plot_value += object.get_y_velocity_at(points)
             elif scalar_to_plot == "velmag":
-                x_vels += object.get_x_velocity_at(points)
-                y_vels += object.get_y_velocity_at(points)
-
-                streamfunction += object.get_streamfunction_at(points)
-                scalar_to_plot_value = np.sqrt(x_vels**2 + y_vels**2) ## Gets overwritten
+                x_vels              += object.get_x_velocity_at(points)
+                y_vels              += object.get_y_velocity_at(points)
+                streamfunction      += object.get_streamfunction_at(points)
+                scalar_to_plot_value = np.sqrt(x_vels**2 + y_vels**2)   ## Gets overwritten
 
                 min2 = np.nanpercentile(streamfunction, 5)
                 max2 = np.nanpercentile(streamfunction, 95)
             elif scalar_to_plot == "pressure":
                 x_vels += object.get_x_velocity_at(points)
                 y_vels += object.get_y_velocity_at(points)
-                V2      = x_vels**2 + y_vels**2                      ## Gets overwritten
+                V2      = x_vels**2 + y_vels**2                         ## Gets overwritten
 
                 if flow_element_type(object) == "Uniform":
                     u_cumulative += object.u
                     v_cumulative += object.v
-                    V2_infty      = u_cumulative**2 + v_cumulative**2
-                    if V2_infty == 0: V2_infty = 1
+                    V2_infty      = u_cumulative**2 + v_cumulative**2   ## Gets overwritten
+                    if V2_infty  == 0: V2_infty = 1                      ## Edge exception in calculation of Cp
 
-                scalar_to_plot_value = 1 - V2/V2_infty
+                scalar_to_plot_value = 1 - V2/V2_infty                  ## Cp calculation
 
             else:
                 raise Exception

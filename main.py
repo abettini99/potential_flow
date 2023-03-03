@@ -1,13 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Authors:       A. Bettini and S. Van Hulle
+Last Modified: 2023-03-03
+
+Incompressible flow visualizer using the potentialflowvisualizer module.
+Utilizes streamlit for user interface, whereas plotly is used for plotting.
+
+First version of the code.
+"""
+
 # Library imports
 from numpy import deg2rad, linspace
 import streamlit as st
 import plotly.express as px
 import potentialflowvisualizer as pfv
 from src.flowfield import Flowfield
-from src.commondicts import TYPE_NAME_DICT, PRESET_DICT, ELEMENT_DEFAULT_DICT
+from src.commondicts import PRESET_DICT, ELEMENT_DEFAULT_DICT
 from src.commonfuncs import flow_element_type
 import copy
 
@@ -17,26 +27,25 @@ import copy
 COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
 
 def initialize_session_state():
-    default_dict = {
-        "xmin": -1.0,
-        "xmax": 1.0,
-        "ymin": -1.0,
-        "ymax": 1.0,
-        "xsteps": 300,
-        "field": Flowfield(),
-        "update_trigger": False,
-        "figs": {},
-        "plot_objects": True,
-        "colorscheme": "Viridis",
-        "n_contour_lines": 15,
-        "show_potential": False,
-        "show_streamfunction": False,
-        "show_velmag": True,
-        "show_pressure": True,
-        "show_xvel": False,
-        "show_yvel": False,
-        "Graphing_Mode": 'Easy Mode'
-    }
+    default_dict = {"xmin": -1.0,
+                    "xmax": 1.0,
+                    "ymin": -1.0,
+                    "ymax": 1.0,
+                    "xsteps": 300,
+                    "field": Flowfield(),
+                    "update_trigger": False,
+                    "figs": {},
+                    "plot_objects": True,
+                    "colorscheme": "Viridis",
+                    "n_contour_lines": 15,
+                    "show_potential": False,
+                    "show_streamfunction": False,
+                    "show_velmag": True,
+                    "show_pressure": True,
+                    "show_xvel": False,
+                    "show_yvel": False,
+                    "Graphing_Mode": 'Easy Mode'
+                   }
 
     for key, val in default_dict.items():
         if not key in st.session_state:
@@ -51,11 +60,10 @@ initialize_session_state()
 #### ================== ####
 def update():
     ## Recalculate gridpoint positions
-    y_steps = int(
-        st.session_state["xsteps"]
-        * (st.session_state["ymax"] - st.session_state["ymin"])
-        / (st.session_state["xmax"] - st.session_state["xmin"])
-    )
+    y_steps = int(st.session_state["xsteps"]
+                  * (st.session_state["ymax"] - st.session_state["ymin"])
+                  / (st.session_state["xmax"] - st.session_state["xmin"])
+                 )
     x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
     y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
@@ -118,7 +126,6 @@ with welcome:
         text = ifstream.read()
         text = text.split("---")
     st.markdown(text[0] +"---"+ text[2])
-
     ## TUD logo at bottom of sidebar
     st.image("images/TU_Delft_Logo.png", width=200)
 
@@ -126,7 +133,8 @@ with welcome:
 with graphing:
     st.radio("Graphing Mode:",
              key='Graphing_Mode',
-             options=['Easy Mode', 'Expert Mode'])
+             options=['Easy Mode', 'Expert Mode']
+            )
 
     st.markdown("""----""")
     if st.session_state["Graphing_Mode"] == 'Easy Mode':
