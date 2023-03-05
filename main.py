@@ -24,7 +24,7 @@ import copy
 #### =================== ####
 #### Session Information ####
 #### =================== ####
-COLOR_SCHEMES = ["rainbow"] + sorted(px.colors.named_colorscales())
+COLOR_SCHEMES = sorted(px.colors.named_colorscales())
 
 def initialize_session_state():
     default_dict = {"xmin": -1.0,
@@ -35,7 +35,7 @@ def initialize_session_state():
                     "field": Flowfield(),
                     "update_trigger": False,
                     "figs": {},
-                    "colorscheme": "Viridis",
+                    "colorscheme": "rainbow",
                     "n_contour_lines": 15,
                    }
 
@@ -119,7 +119,7 @@ with welcome:
 ## Graphing Sidebar tab
 with graphing:
     st.header("Layout")
-    st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES)
+    st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
     st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
 
     st.markdown("""----""")
@@ -129,6 +129,8 @@ with graphing:
     st.session_state["ymin"]                = st.number_input("y minimum", value=-1.0)
     st.session_state["ymax"]                = st.number_input("y maximum", value=1.0)
     st.session_state["xsteps"]              = st.number_input("x-steps on the grid", value=300)
+
+    update()
 
 def adjust_objects(objects, id=None):
     for flowobj in objects:
@@ -177,9 +179,8 @@ with presets:
 ## Main Screen ##
 ## =========== ##
 ## Plot the figures
-if st.session_state["figs"]:
-    st.subheader("Contour Plots")
-    st.markdown('Hover over the graph to see information on the shown field itself')
+st.subheader("Contour Plots")
+st.markdown('Hover over the graph to see information on the shown field itself, if there are no elements, add them in yourself.')
 for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
 

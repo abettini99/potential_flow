@@ -51,6 +51,7 @@ class Flowfield:
              n_contour_lines=15,
             ):
 
+        ## Create figures
         fig = make_subplots(rows=2, cols=2,
                             subplot_titles=(LONG_NAME_DICT["velmag"], LONG_NAME_DICT["pressure"],
                                             LONG_NAME_DICT["potential"], LONG_NAME_DICT["streamfunction"]),
@@ -61,8 +62,7 @@ class Flowfield:
                             horizontal_spacing=0.05,
                             vertical_spacing=0.05
                            )
-
-        if len(self.objects) == 0:
+        if len(self.objects) == 0:  # Edge scenario
             return fig
 
         ## System variables
@@ -71,7 +71,7 @@ class Flowfield:
         Y_r     = np.reshape(Y, -1)
         points  = np.vstack((X_r, Y_r)).T
 
-        ##
+        ## Get initial variables that are written into
         x_vels              = np.zeros_like(X_r)
         y_vels              = np.zeros_like(X_r)
         potential           = np.zeros_like(X_r)
@@ -93,13 +93,12 @@ class Flowfield:
                 if V2_infty  == 0: V2_infty = 1                      ## Edge exception in calculation of Cp
 
             V2      = x_vels**2 + y_vels**2            ## Gets overwritten
-            V       = np.sqrt(V2)
+            V       = np.sqrt(V2)                      ## Gets overwritten
             Cp      = 1 - V2/V2_infty                  ## Cp calculation
 
         #### ================ ####
         #### Plotting Routine ####
         #### ================ ####
-
         ## Velocity Magnitude
         min = np.nanpercentile(V, 5)
         max = np.nanpercentile(V, 95)
@@ -166,6 +165,7 @@ class Flowfield:
                                 ),
                       row=1, col=2
                      )
+
         ## Potential Function
         min = np.nanpercentile(potential, 5)
         max = np.nanpercentile(potential, 95)
@@ -190,6 +190,7 @@ class Flowfield:
                                 ),
                       row=2, col=1
                      )
+
         ## Streamfunction
         min = np.nanpercentile(streamfunction, 5)
         max = np.nanpercentile(streamfunction, 95)
@@ -214,9 +215,9 @@ class Flowfield:
                                 ),
                       row=2, col=2
                      )
+
         ## Plot flow element origins
         rows, cols = fig._get_subplot_rows_columns()    ## rows, cols are range, not int
-
         for row in rows:
             for col in cols:
                 for i, object in enumerate(self.objects):
