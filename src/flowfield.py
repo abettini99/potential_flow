@@ -113,7 +113,7 @@ class Flowfield:
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
-                                               '<br>f(x,y) = %{z:.4e}'+
+                                               '<br>|V| = %{z:.4e}'+
                                                '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
                                  colorbar=dict(title_text= LONG_NAME_DICT["velmag"],
                                                title_side= 'right',
@@ -158,7 +158,7 @@ class Flowfield:
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
-                                               '<br>f(x,y) = %{z:.4e}'+
+                                               '<br>Cp = %{z:.4e}'+
                                                '<extra></extra>',
                                  colorbar=dict(title_text= LONG_NAME_DICT["pressure"],
                                                title_side= 'right',
@@ -187,7 +187,7 @@ class Flowfield:
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
-                                               '<br>f(x,y) = %{z:.4e}'+
+                                               '<br>phi = %{z:.4e}'+
                                                '<extra></extra>',
                                  colorbar=dict(title_text= LONG_NAME_DICT["potential"],
                                                title_side= 'right',
@@ -216,7 +216,7 @@ class Flowfield:
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
-                                               '<br>f(x,y) = %{z:.4e}'+
+                                               '<br>psi = %{z:.4e}'+
                                                '<extra></extra>',
                                  colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"],
                                                title_side= 'right',
