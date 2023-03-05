@@ -94,18 +94,21 @@ def update():
     x_points = linspace(st.session_state["xmin"], st.session_state["xmax"], st.session_state["xsteps"])
     y_points = linspace(st.session_state["ymin"], st.session_state["ymax"], y_steps)
 
-    for name in ["potential", "streamfunction", "xvel", "yvel", "velmag"]:
+    showprefix = "show_"
+    figkeys = [key for key in st.session_state if key.startswith(showprefix)]
+    fignames = [key[len(showprefix) :] for key in figkeys if st.session_state[key]]
 
-        if st.session_state[f"show_{name}"]:
-            st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
-                scalar_to_plot=name,
-                x_points=x_points,
-                y_points=y_points,
-                show=False,
-                colorscheme=st.session_state["colorscheme"],
-                n_contour_lines=st.session_state["n_contour_lines"],
-                plot_flow_elements=st.session_state["plot_objects"],
-            )
+    for name in fignames:
+
+        st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
+            scalar_to_plot=name,
+            x_points=x_points,
+            y_points=y_points,
+            show=False,
+            colorscheme=st.session_state["colorscheme"],
+            n_contour_lines=st.session_state["n_contour_lines"],
+            plot_flow_elements=st.session_state["plot_objects"],
+        )
 
 
 #### ================ ####
@@ -120,7 +123,7 @@ st.sidebar.title("Potential Flow Tool")
 ## App footer
 footer = """
 <style>
-    #MainMenu {visibility: hidden;}
+    # MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     footer:after {
         content:'Made with Streamlit by Andrea Bettini and Simon Van Hulle'; 
@@ -144,6 +147,7 @@ welcome, grid, layout, add_element, presets = st.sidebar.tabs(
     ["Welcome", "Grid", "Layout", "Add Flow Element", "Add Preset"]
 )
 
+## Include the README file into the application
 with welcome:
     with open("README.md", "r") as ifstream:
         text = ifstream.read()
@@ -172,9 +176,10 @@ with layout:
 def adjust_objects(objects, id=None):
     for flowobj in objects:
 
-        for key, val in flowobj.__dict__.items():
+        for key in flowobj.__dict__:
+            val = flowobj.__dict__[key]
             flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
-
+            
     return
 
 
@@ -184,11 +189,12 @@ with add_element:
     try:
         flowobj = copy.deepcopy(ELEMENT_DEFAULT_DICT[key])
 
-        name = adjust_objects([flowobj], "element")
-
         if st.button("Add ", key="add_element"):
             st.session_state["field"].objects.extend([flowobj])
             update()
+            
+        name = adjust_objects([flowobj], "element")
+
 
     except KeyError:
         pass
