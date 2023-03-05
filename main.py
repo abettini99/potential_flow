@@ -24,7 +24,7 @@ import copy
 #### =================== ####
 #### Session Information ####
 #### =================== ####
-COLOR_SCHEMES = ["viridis"] + sorted(px.colors.named_colorscales())
+COLOR_SCHEMES = ["rainbow"] + sorted(px.colors.named_colorscales())
 
 def initialize_session_state():
     default_dict = {"xmin": -1.0,
@@ -35,16 +35,8 @@ def initialize_session_state():
                     "field": Flowfield(),
                     "update_trigger": False,
                     "figs": {},
-                    "plot_objects": True,
                     "colorscheme": "Viridis",
                     "n_contour_lines": 15,
-                    "show_potential": False,
-                    "show_streamfunction": False,
-                    "show_velmag": True,
-                    "show_pressure": True,
-                    "show_xvel": False,
-                    "show_yvel": False,
-                    "Graphing_Mode": 'Easy Mode'
                    }
 
     for key, val in default_dict.items():
@@ -69,17 +61,12 @@ def update():
 
     ## Clear dictionary of figures to display and redraw them
     st.session_state["figs"].clear()
-    for name in ["potential", "streamfunction", "xvel", "yvel", "velmag", "pressure"]:
-        if st.session_state[f"show_{name}"]:
-            st.session_state["figs"][f"{name}"] = st.session_state["field"].draw(
-                scalar_to_plot=name,
-                x_points=x_points,
-                y_points=y_points,
-                show=False,
-                colorscheme=st.session_state["colorscheme"],
-                n_contour_lines=st.session_state["n_contour_lines"],
-                plot_flow_elements=st.session_state["plot_objects"],
-            )
+
+    st.session_state["figs"][f"Graphs"] = st.session_state["field"].draw(x_points=x_points,
+                                                                         y_points=y_points,
+                                                                         colorscheme=st.session_state["colorscheme"],
+                                                                         n_contour_lines=st.session_state["n_contour_lines"],
+                                                                        )
     return
 
 #### ================ ####
@@ -131,46 +118,17 @@ with welcome:
 
 ## Graphing Sidebar tab
 with graphing:
-    st.radio("Graphing Mode:",
-             key='Graphing_Mode',
-             options=['Easy Mode', 'Expert Mode']
-            )
+    st.header("Layout")
+    st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES)
+    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
 
     st.markdown("""----""")
-    if st.session_state["Graphing_Mode"] == 'Easy Mode':
-        st.session_state["plot_objects"]        = True
-        st.session_state["show_potential"]      = False
-        st.session_state["show_streamfunction"] = False
-        st.session_state["show_velmag"]         = True
-        st.session_state["show_pressure"]       = True
-        st.session_state["show_xvel"]           = False
-        st.session_state["show_yvel"]           = False
-        st.session_state["colorscheme"]         = st.selectbox("Color Scheme", options=COLOR_SCHEMES)
-        st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
-
-        update()
-
-    if st.session_state["Graphing_Mode"] == 'Expert Mode':
-        st.header("Grid")
-        st.session_state["xmin"]                = st.number_input("x minimum", value=-1.0)
-        st.session_state["xmax"]                = st.number_input("x maximum", value=1.0)
-        st.session_state["ymin"]                = st.number_input("y minimum", value=-1.0)
-        st.session_state["ymax"]                = st.number_input("y maximum", value=1.0)
-        st.session_state["xsteps"]              = st.number_input("x-steps on the grid", value=300)
-
-        st.markdown("""----""")
-        st.header("Layout")
-        st.session_state["plot_objects"]        = st.checkbox("Plot flow objects", True)
-        st.session_state["show_potential"]      = st.checkbox("Plot potential function", True)
-        st.session_state["show_streamfunction"] = st.checkbox("Plot stream function", True)
-        st.session_state["show_velmag"]         = st.checkbox("Plot velocity magnitude", True)
-        st.session_state["show_pressure"]       = st.checkbox("Plot pressure coefficient", True)
-        st.session_state["show_xvel"]           = st.checkbox("Plot x velocity", False)
-        st.session_state["show_yvel"]           = st.checkbox("Plot y velocity", False)
-        st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES)
-        st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
-
-        update()
+    st.header("Grid")
+    st.session_state["xmin"]                = st.number_input("x minimum", value=-1.0)
+    st.session_state["xmax"]                = st.number_input("x maximum", value=1.0)
+    st.session_state["ymin"]                = st.number_input("y minimum", value=-1.0)
+    st.session_state["ymax"]                = st.number_input("y maximum", value=1.0)
+    st.session_state["xsteps"]              = st.number_input("x-steps on the grid", value=300)
 
 def adjust_objects(objects, id=None):
     for flowobj in objects:
@@ -221,6 +179,7 @@ with presets:
 ## Plot the figures
 if st.session_state["figs"]:
     st.subheader("Contour Plots")
+    st.markdown('Hover over the graph to see information on the shown field itself')
 for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
 
@@ -243,8 +202,6 @@ if not len(st.session_state["field"].objects) == 0:
             update()
     with ae_col2:
         if st.button("Remove Flow", key="remove"):
-            # print(st.session_state["field"].objects)
-            # print(flowobj)
             st.session_state["field"].objects.remove(flowobj)
             update()
 
