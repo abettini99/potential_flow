@@ -59,8 +59,8 @@ class Flowfield:
                             shared_yaxes=True,
                             x_title='x',
                             y_title='y',
-                            horizontal_spacing=0.05,
-                            vertical_spacing=0.05
+                            horizontal_spacing=0.08,
+                            vertical_spacing=0.08
                            )
         if len(self.objects) == 0:  # Edge scenario
             return fig
@@ -110,17 +110,21 @@ class Flowfield:
                                                size=(max - min) / n_contour_lines,
                                               ),
                                  contours_showlines=False,
-                                 showscale=False,
+                                 showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
                                                '<br>f(x,y) = %{z:.4e}'+
                                                '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
-                                 # colorbar=dict(ticks     = "inside",
-                                 #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
-                                 #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
-                                 #               tickwidth = 2,
-                                 #               ticklen   = 10
-                                 #              ),
+                                 colorbar=dict(title_text= LONG_NAME_DICT["velmag"],
+                                               title_side= 'right',
+                                               ticks     = "inside",
+                                               len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                               tickwidth = 2,
+                                               ticklen   = 10,
+                                               x         = 1.02,
+                                               y         = 0.77,
+                                               ypad      = 0
+                                              ),
                                 ),
                       row=1, col=1
                      )
@@ -151,17 +155,21 @@ class Flowfield:
                                                size=(max - min) / n_contour_lines,
                                               ),
                                  contours_showlines=False,
-                                 showscale=False,
+                                 showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
                                                '<br>f(x,y) = %{z:.4e}'+
                                                '<extra></extra>',
-                                 # colorbar=dict(ticks     = "inside",
-                                 #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
-                                 #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
-                                 #               tickwidth = 2,
-                                 #               ticklen   = 10
-                                 #              ),
+                                 colorbar=dict(title_text= LONG_NAME_DICT["pressure"],
+                                               title_side= 'right',
+                                               ticks     = "inside",
+                                               len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                               tickwidth = 2,
+                                               ticklen   = 10,
+                                               x         = 1.17,
+                                               y         = 0.77,
+                                               ypad      = 0
+                                              ),
                                 ),
                       row=1, col=2
                      )
@@ -176,17 +184,21 @@ class Flowfield:
                                                end=max,
                                                size=(max - min) / n_contour_lines,
                                               ),
-                                 showscale=False,
+                                 showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
                                                '<br>f(x,y) = %{z:.4e}'+
                                                '<extra></extra>',
-                                 # colorbar=dict(ticks     = "inside",
-                                 #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
-                                 #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
-                                 #               tickwidth = 2,
-                                 #               ticklen   = 10
-                                 #              ),
+                                 colorbar=dict(title_text= LONG_NAME_DICT["potential"],
+                                               title_side= 'right',
+                                               ticks     = "inside",
+                                               len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                               tickwidth = 2,
+                                               ticklen   = 10,
+                                               x         = 1.02,
+                                               y         = 0.23,
+                                               ypad      = 0
+                                              ),
                                 ),
                       row=2, col=1
                      )
@@ -201,17 +213,21 @@ class Flowfield:
                                                end=max,
                                                size=(max - min) / n_contour_lines,
                                               ),
-                                 showscale=False,
+                                 showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
                                                '<br>f(x,y) = %{z:.4e}'+
                                                '<extra></extra>',
-                                 # colorbar=dict(ticks     = "inside",
-                                 #               len       = 1,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
-                                 #               ypad      = 0,                          ## y-padding of colorbar, reduces colorbar height
-                                 #               tickwidth = 2,
-                                 #               ticklen   = 10
-                                 #              ),
+                                 colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"],
+                                               title_side= 'right',
+                                               ticks     = "inside",
+                                               len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
+                                               tickwidth = 2,
+                                               ticklen   = 10,
+                                               x         = 1.17,
+                                               y         = 0.23,
+                                               ypad      = 0
+                                              ),
                                 ),
                       row=2, col=2
                      )
@@ -311,7 +327,7 @@ class Flowfield:
         fig.update_layout(font_color='#000000',
                           plot_bgcolor='rgba(255,255,255,1)',
                           paper_bgcolor='rgba(255,255,255,1)',
-                          width=800,
+                          width=900,
                           height=800,
                           showlegend=False,
                          )
