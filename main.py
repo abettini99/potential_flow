@@ -78,7 +78,7 @@ st.sidebar.title("Potential Flow Tool")
 ## App footer
 footer = """
 <style>
-    #MainMenu {visibility: hidden;}
+    # MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     footer:after {
         content:'Made with Streamlit by Andrea Bettini and Simon Van Hulle';
@@ -108,7 +108,7 @@ welcome, graphing, add_element, presets = st.sidebar.tabs(
 
 ## Welcome sidebar tab
 with welcome:
-    ## Truncated README.md file used
+    ## Include the README file into the application
     with open("README.md", "r") as ifstream:
         text = ifstream.read()
         text = text.split("---")
