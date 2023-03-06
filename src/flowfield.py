@@ -51,7 +51,7 @@ class Flowfield:
              n_contour_lines=15,
             ):
 
-        ## Create figures
+        ## Create plots
         fig = make_subplots(rows=2, cols=2,
                             subplot_titles=(LONG_NAME_DICT["velmag"], LONG_NAME_DICT["pressure"],
                                             LONG_NAME_DICT["potential"], LONG_NAME_DICT["streamfunction"]),
@@ -115,7 +115,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>|V| = %{z:.4e}'+
                                                '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
-                                 colorbar=dict(title_text= LONG_NAME_DICT["velmag"],
+                                 colorbar=dict(title_text= LONG_NAME_DICT["velmag"] + '   [m s^-1]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -160,7 +160,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>Cp = %{z:.4e}'+
                                                '<extra></extra>',
-                                 colorbar=dict(title_text= LONG_NAME_DICT["pressure"],
+                                 colorbar=dict(title_text= LONG_NAME_DICT["pressure"] + '   [-]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -189,7 +189,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>phi = %{z:.4e}'+
                                                '<extra></extra>',
-                                 colorbar=dict(title_text= LONG_NAME_DICT["potential"],
+                                 colorbar=dict(title_text= LONG_NAME_DICT["potential"] + '   [m^2 s^-1]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -218,7 +218,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>psi = %{z:.4e}'+
                                                '<extra></extra>',
-                                 colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"],
+                                 colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"] + '   [m^2 s^-1]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
