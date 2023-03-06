@@ -53,7 +53,7 @@ class Flowfield:
 
         ## Create plots
         fig = make_subplots(rows=2, cols=2,
-                            subplot_titles=(LONG_NAME_DICT["velmag"], LONG_NAME_DICT["pressure"],
+                            subplot_titles=(LONG_NAME_DICT["xvel"], LONG_NAME_DICT["pressure"],
                                             LONG_NAME_DICT["potential"], LONG_NAME_DICT["streamfunction"]),
                             shared_xaxes=True,
                             shared_yaxes=True,
@@ -93,17 +93,17 @@ class Flowfield:
                 if V2_infty  == 0: V2_infty = 1                     ## Edge exception in calculation of Cp
 
             V2      = x_vels**2 + y_vels**2            ## Gets overwritten
-            V       = np.sqrt(V2)                      ## Gets overwritten
+            # V       = np.sqrt(V2)                      ## Gets overwritten
             Cp      = 1 - V2/V2_infty                  ## Cp calculation
 
         #### ================ ####
         #### Plotting Routine ####
         #### ================ ####
         ## Velocity Magnitude
-        min = np.nanpercentile(V, 5)
-        max = np.nanpercentile(V, 95)
-        fig.add_trace(go.Contour(name=LONG_NAME_DICT["velmag"],
-                                 x=x_points, y=y_points, z=np.reshape(V, X.shape),
+        min = np.nanpercentile(x_vels, 5)
+        max = np.nanpercentile(x_vels, 95)
+        fig.add_trace(go.Contour(name=LONG_NAME_DICT["xvel"],
+                                 x=x_points, y=y_points, z=np.reshape(x_vels, X.shape),
                                  colorscale=colorscheme,
                                  contours=dict(start=min,
                                                end=max,
@@ -113,9 +113,9 @@ class Flowfield:
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
-                                               '<br>|V| = %{z:.4e}'+
+                                               '<br>u = %{z:.4e}'+
                                                '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
-                                 colorbar=dict(title_text= LONG_NAME_DICT["velmag"] + '   [m s^-1]',
+                                 colorbar=dict(title_text= LONG_NAME_DICT["xvel"] + '   [m s^-1]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
