@@ -90,7 +90,7 @@ class Flowfield:
                 u_cumulative += object.u
                 v_cumulative += object.v
                 V2_infty      = u_cumulative**2 + v_cumulative**2   ## Gets overwritten
-                if V2_infty  == 0: V2_infty = 1                      ## Edge exception in calculation of Cp
+                if V2_infty  == 0: V2_infty = 1                     ## Edge exception in calculation of Cp
 
             V2      = x_vels**2 + y_vels**2            ## Gets overwritten
             V       = np.sqrt(V2)                      ## Gets overwritten
@@ -237,6 +237,7 @@ class Flowfield:
         for row in rows:
             for col in cols:
                 for i, object in enumerate(self.objects):
+                    ## All flow elements that are described by a point
                     try:
                         fig.add_trace(go.Scatter(name=f"{i + 1}. [{flow_element_type(object)}]",
                                                  x=[object.x], y=[object.y],
@@ -256,6 +257,7 @@ class Flowfield:
                     except AttributeError:
                         pass
 
+                    ## All flow elements that are described by a line
                     try:
                         fig.add_trace(go.Line(name=f"{i + 1}. [{flow_element_type(object)}]",
                                               x=[object.x1, object.x2], y=[object.y1, object.y2],
