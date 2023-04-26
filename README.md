@@ -10,7 +10,7 @@ The functionality is very straightforward:
 * Use the `Clear Flow` and `Update Flow` buttons to remove or update all flow elements.
 * Use the `Graphing` tab to change the domain and mesh of the plots, and to adjust the looks of the plots.
 * Add individual flow elements in the `Add Flow Element` tab.
-* Add Pre-defined combinations of elements in the `Add Generic Flows` tab.
+* Add pre-defined combinations of elements in the `Add Generic Flows` tab.
 * Below the plots, a dropdown menu will allow you to adjust previously added flow elements.
 
 ---

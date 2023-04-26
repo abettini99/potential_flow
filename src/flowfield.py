@@ -5,6 +5,7 @@
 import numpy as np
 import plotly as ply
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 import plotly.io as pio
 from plotly.subplots import make_subplots
 from src.commondicts import TYPE_NAME_DICT, LONG_NAME_DICT
@@ -41,7 +42,7 @@ def line_width(object):
 
 ## FlowField Class
 class Flowfield:
-    def __init__(self, objects=[]):
+    def __init__(self, objects={}):
         self.objects = objects
 
     def draw(self,
@@ -67,8 +68,8 @@ class Flowfield:
 
         ## System variables
         X, Y    = np.meshgrid(x_points, y_points)
-        X_r     = np.reshape(X, -1)
-        Y_r     = np.reshape(Y, -1)
+        X_r     = X.flatten()
+        Y_r     = Y.flatten()
         points  = np.vstack((X_r, Y_r)).T
 
         ## Get initial variables that are written into
@@ -81,7 +82,7 @@ class Flowfield:
         V2_infty            = 1 ## Default value in case no uniform flow objects
 
         ## Get plotting values
-        for object in self.objects:
+        for object in self.objects.values():
             x_vels              += object.get_x_velocity_at(points)
             y_vels              += object.get_y_velocity_at(points)
             potential           += object.get_potential_at(points)
@@ -129,20 +130,20 @@ class Flowfield:
                       row=1, col=1
                      )
 
-        min = np.nanpercentile(streamfunction, 5)
-        max = np.nanpercentile(streamfunction, 95)
-        fig.add_trace(go.Contour(x=x_points, y=y_points, z=np.reshape(streamfunction, X.shape),
-                                 colorscale=[[0,'#000000'],[1,'#000000']],
-                                 contours=dict(start=min,
-                                               end=max,
-                                               size=(max - min) / n_contour_lines,
-                                              ),
-                                 showscale=False,
-                                 contours_coloring='lines',
-                                 hoverinfo='skip'
-                                ),
-                      row=1, col=1
-                     )
+        # min = np.nanpercentile(streamfunction, 5)
+        # max = np.nanpercentile(streamfunction, 95)
+        # fig.add_trace(go.Contour(x=x_points, y=y_points, z=np.reshape(streamfunction, X.shape),
+        #                          colorscale=[[0,'#000000'],[1,'#000000']],
+        #                          contours=dict(start=min,
+        #                                        end=max,
+        #                                        size=(max - min) / n_contour_lines,
+        #                                       ),
+        #                          showscale=False,
+        #                          contours_coloring='lines',
+        #                          hoverinfo='skip'
+        #                         ),
+        #               row=1, col=1
+        #              )
 
         ## Pressure Coefficient
         min = np.nanpercentile(Cp, 5)
@@ -184,6 +185,7 @@ class Flowfield:
                                                end=max,
                                                size=(max - min) / n_contour_lines,
                                               ),
+                                 contours_showlines=False,
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
@@ -213,6 +215,7 @@ class Flowfield:
                                                end=max,
                                                size=(max - min) / n_contour_lines,
                                               ),
+                                 contours_showlines=False,
                                  showscale=True,
                                  hovertemplate='x = %{x:.4f}'+
                                                '<br>y = %{y:.4f}'+
@@ -232,11 +235,37 @@ class Flowfield:
                       row=2, col=2
                      )
 
+
+        streamlines = ff.create_streamline(x_points, -y_points,                                  # for some reason, we need the x-axis reflection, so we need negative y
+                                      np.reshape(x_vels, X.shape), -np.reshape(y_vels, Y.shape), # for some reason, we need the x-axis reflection, so we need negative y
+                                      density=1.5,
+                                      hoverinfo='skip',
+                                      name='stream_lines',
+                                      line=dict(color='rgba(0,0,0,1)',
+                                                width=1)
+                                     )
+        potentiallines = ff.create_streamline(x_points, y_points,
+                                      np.reshape(y_vels, Y.shape), -(np.reshape(x_vels, X.shape)),
+                                      density=1.5,
+                                      arrow_scale=0.00001,
+                                      hoverinfo='skip',
+                                      name='potential_lines',
+                                      line=dict(color='rgba(0,0,0,1)',
+                                                width=1)
+                                     )
+        # https://stackoverflow.com/questions/68187485/subplot-for-go-figure-objects-with-multiple-plots-within-them
+        for t in streamlines.data:
+            fig.append_trace(t, row=1, col=1)
+            fig.append_trace(t, row=1, col=2)
+            fig.append_trace(t, row=2, col=2)
+        for t in potentiallines.data:
+            fig.append_trace(t, row=2, col=1)
+
         ## Plot flow element origins
         rows, cols = fig._get_subplot_rows_columns()    ## rows, cols are range, not int
         for row in rows:
             for col in cols:
-                for i, object in enumerate(self.objects):
+                for i, object in enumerate(self.objects.values()):
                     ## All flow elements that are described by a point
                     try:
                         fig.add_trace(go.Scatter(name=f"{i + 1}. [{flow_element_type(object)}]",
