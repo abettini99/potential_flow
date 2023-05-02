@@ -210,16 +210,14 @@ if not len(st.session_state["field"].objects) == 0:
     st.markdown("""----""")
     st.subheader("Adjust your flow elements")
 
-    # dropdown_dict = {}
-    # for i, obj in enumerate(st.session_state["field"].objects):
-    #     dropdown_dict[f"{i + 1}. [{flow_element_type(obj)}]"] = obj
-
     key     = st.selectbox("Select Flow Element", options=st.session_state["field"].objects.keys(), key='adjust_selectbox')
     elem    = st.session_state["field"].objects[key]
 
+    # Adjustment field
     for k, v in elem.__dict__.items():
         elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
 
+    # Removal field
     if st.button("Remove Flow", key="remove"):
 
         del st.session_state["field"].objects[key]
