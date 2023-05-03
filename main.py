@@ -37,6 +37,8 @@ def initialize_session_state():
                     "figs": {},
                     "colorscheme": "rainbow",
                     "n_contour_lines": 15,
+                    "n_streamline_density": 0.5,
+                    "potential_streamline_bool": False
                    }
 
     for key, val in default_dict.items():
@@ -66,10 +68,12 @@ def draw():
     ## Clear dictionary of figures to display and redraw them
     st.session_state["figs"].clear()
 
-    st.session_state["figs"][f"Graphs"] = st.session_state["field"].draw(x_points=x_points,
-                                                                         y_points=y_points,
-                                                                         colorscheme=st.session_state["colorscheme"],
-                                                                         n_contour_lines=st.session_state["n_contour_lines"],
+    st.session_state["figs"][f"Graphs"] = st.session_state["field"].draw(x_points                  = x_points,
+                                                                         y_points                  = y_points,
+                                                                         colorscheme               = st.session_state["colorscheme"],
+                                                                         n_contour_lines           = st.session_state["n_contour_lines"],
+                                                                         n_streamline_density      = st.session_state["n_streamline_density"],
+                                                                         potential_streamline_bool = st.session_state["potential_streamline_bool"]
                                                                         )
 
 #### ================ ####
@@ -123,30 +127,20 @@ with welcome:
 ## Graphing Sidebar tab
 with graphing:
     st.header("Layout")
-    st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
-    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
+    st.session_state["colorscheme"]               = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
+    st.session_state["n_contour_lines"]           = st.number_input("Number of filled contours", value=15, min_value=5)
+    st.session_state["n_streamline_density"]      = st.number_input("Streamline density", value=0.5, min_value=0.01)
+    st.session_state["potential_streamline_bool"] = st.checkbox("Potential 'streamlines'", value=False)
 
     st.markdown("""----""")
     st.header("Grid")
-    st.session_state["xmin"]                = st.number_input("x minimum", value=-2.0)
-    st.session_state["xmax"]                = st.number_input("x maximum", value=2.0)
-    st.session_state["ymin"]                = st.number_input("y minimum", value=-2.0)
-    st.session_state["ymax"]                = st.number_input("y maximum", value=2.0)
-    st.session_state["xsteps"]              = st.number_input("x-steps on the grid", value=100)
+    st.session_state["xmin"]   = st.number_input("x minimum", value=-2.0)
+    st.session_state["xmax"]   = st.number_input("x maximum", value=2.0)
+    st.session_state["ymin"]   = st.number_input("y minimum", value=-2.0)
+    st.session_state["ymax"]   = st.number_input("y maximum", value=2.0)
+    st.session_state["xsteps"] = st.number_input("x-steps on the grid", value=100, min_value=50)
 
     update()
-
-def adjust_objects(objects, id=None):
-    for flowobj in objects:
-        ## Add divider
-        st.markdown("""----""")
-        ## Extra divider in case a preset is used
-        if id == "preset":
-            st.subheader(flow_element_type(obj))
-        ## Fields to be edited
-        for key, val in flowobj.__dict__.items():
-            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
-    return
 
 ## Add element sidebar tab
 with add_element:
@@ -156,18 +150,47 @@ with add_element:
     # Retrieve necessary arguments for class using default values from a default element
     proto_elem  = ELEMENT_DEFAULT_DICT[key]
     args        = [None]*len(proto_elem.__dict__)
+    # Create input fields
     for i, (k, v) in enumerate(proto_elem.__dict__.items()):
-        args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
+        # usually strength has some condition, i.e. Sources / Sinks are defined by their sign, so we add case studies
+        if k == 'strength':
+            if   flow_element_type(proto_elem) == 'Source':
+                args[i] = st.number_input(f"{k}", value=float(v), min_value= 0.01, key=f"addelement_{key}_{i}")
+            elif flow_element_type(proto_elem) == 'Sink':
+                args[i] = st.number_input(f"{k}", value=float(v), max_value=-0.01, key=f"addelement_{key}_{i}")
+        # otherwise it is inputs
+        else:
+            args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
 
     # Add element
     if st.button("Add", key="add_element"):
-        elem = proto_elem.__class__
-        num  = len(st.session_state["field"].objects) + 1
-        name = f"{num}. [{flow_element_type(proto_elem)}]"
-        st.session_state["field"].objects[name] = elem(*args)
+        add_authority = True
 
-        st.markdown(f'Added {name}')
-        update()
+        ## Ensure Source / Sink overlap does not happen, as it causes an issue with ff.create_streamline()
+        if flow_element_type(proto_elem) == 'Source' or flow_element_type(proto_elem) == 'Sink':
+            keys = list(st.session_state["field"].objects.keys())
+            for key in keys:
+                elem = st.session_state["field"].objects[key]
+                # Compare arguments with all other sources/sink
+                if flow_element_type(elem) == 'Source' or flow_element_type(elem) == 'Sink':
+                    x0 = args[0]; y0 = args[1]                # Wish it could be more elegant, but this works.
+                    x1 = elem.x;  y1 = elem.y
+
+                    if abs(x0-x1) < 0.01 or abs(y0-y1) < 0.01:
+                        add_authority = False
+
+        ## Add item to flowfield dictionary
+        if add_authority:
+            elem = proto_elem.__class__
+            num  = len(st.session_state["field"].objects) + 1
+            name = f"{num}. [{flow_element_type(proto_elem)}]"
+            st.session_state["field"].objects[name] = elem(*args)
+
+            st.markdown(f'Added {name}')
+            update()
+
+        else:
+            st.markdown(f'Did not add element -- check that Source/Sink position does not conflict with already existing Source/Sink positions')
 
 ## Add preset sidebar tab
 with presets:

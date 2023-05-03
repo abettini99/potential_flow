@@ -49,7 +49,9 @@ class Flowfield:
              x_points=np.linspace(-10, 10, 200),
              y_points=np.linspace(-10, 10, 200),
              colorscheme="rainbow",
-             n_contour_lines=10,
+             n_contour_lines=15,
+             n_streamline_density=0.5,
+             potential_streamline_bool=False
             ):
 
         ## Create plots
@@ -116,7 +118,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>u = %{z:.4e}'+
                                                '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
-                                 colorbar=dict(title_text= LONG_NAME_DICT["xvel"] + '   [m s^-1]',
+                                 colorbar=dict(title_text= LONG_NAME_DICT["xvel"] + '   [m s<sup>-1</sup>]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -191,7 +193,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>phi = %{z:.4e}'+
                                                '<extra></extra>',
-                                 colorbar=dict(title_text= LONG_NAME_DICT["potential"] + '   [m^2 s^-1]',
+                                 colorbar=dict(title_text= LONG_NAME_DICT["potential"] + '   [m<sup>2</sup> s<sup>-1</sup>]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -221,7 +223,7 @@ class Flowfield:
                                                '<br>y = %{y:.4f}'+
                                                '<br>psi = %{z:.4e}'+
                                                '<extra></extra>',
-                                 colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"] + '   [m^2 s^-1]',
+                                 colorbar=dict(title_text= LONG_NAME_DICT["streamfunction"] + '   [m<sup>2</sup> s<sup>-1</sup>]',
                                                title_side= 'right',
                                                ticks     = "inside",
                                                len       = 0.45,                          ## vertical height of colorbar, expressed in a fraction of graph height, final height reduced by ypad
@@ -238,33 +240,30 @@ class Flowfield:
 
         streamlines = ff.create_streamline(x_points, -y_points,                                  # for some reason, we need the x-axis reflection, so we need negative y
                                       np.reshape(x_vels, X.shape), -np.reshape(y_vels, Y.shape), # for some reason, we need the x-axis reflection, so we need negative y
-                                      density=0.5,
+                                      density=n_streamline_density,
                                       hoverinfo='skip',
                                       name='stream_lines',
                                       line=dict(color='rgba(0,0,0,1)',
                                                 width=1)
                                      )
-        
-        potentiallines = ff.create_streamline(x_points, y_points,
-                                      np.reshape(y_vels, Y.shape), -(np.reshape(x_vels, X.shape)),
-                                      density=0.5,
-                                      arrow_scale=0.00001,
-                                      hoverinfo='skip',
-                                      name='potential_lines',
-                                      line=dict(color='rgba(0,0,0,1)',
-                                                width=1)
-                                     )
-        
+        if potential_streamline_bool:
+            potentiallines = ff.create_streamline(x_points, y_points,
+                                          np.reshape(y_vels, Y.shape), -(np.reshape(x_vels, X.shape)),
+                                          density=n_streamline_density,
+                                          arrow_scale=0.00001,
+                                          hoverinfo='skip',
+                                          name='potential_lines',
+                                          line=dict(color='rgba(0,0,0,1)',
+                                                    width=1)
+                                         )
         # https://stackoverflow.com/questions/68187485/subplot-for-go-figure-objects-with-multiple-plots-within-them
         for t in streamlines.data:
             fig.append_trace(t, row=1, col=1)
             fig.append_trace(t, row=1, col=2)
             fig.append_trace(t, row=2, col=2)
-
-
-        ## Uncomment for lines in the potential plot 
-        # for t in potentiallines.data:
-        #     fig.append_trace(t, row=2, col=1)
+        if potential_streamline_bool:
+            for t in potentiallines.data:
+                fig.append_trace(t, row=2, col=1)
 
         ## Plot flow element origins
         rows, cols = fig._get_subplot_rows_columns()    ## rows, cols are range, not int
