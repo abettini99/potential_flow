@@ -49,7 +49,7 @@ class Flowfield:
              x_points=np.linspace(-10, 10, 200),
              y_points=np.linspace(-10, 10, 200),
              colorscheme="rainbow",
-             n_contour_lines=15,
+             n_contour_lines=10,
             ):
 
         ## Create plots
@@ -238,28 +238,33 @@ class Flowfield:
 
         streamlines = ff.create_streamline(x_points, -y_points,                                  # for some reason, we need the x-axis reflection, so we need negative y
                                       np.reshape(x_vels, X.shape), -np.reshape(y_vels, Y.shape), # for some reason, we need the x-axis reflection, so we need negative y
-                                      density=1.5,
+                                      density=0.5,
                                       hoverinfo='skip',
                                       name='stream_lines',
                                       line=dict(color='rgba(0,0,0,1)',
                                                 width=1)
                                      )
+        
         potentiallines = ff.create_streamline(x_points, y_points,
                                       np.reshape(y_vels, Y.shape), -(np.reshape(x_vels, X.shape)),
-                                      density=1.5,
+                                      density=0.5,
                                       arrow_scale=0.00001,
                                       hoverinfo='skip',
                                       name='potential_lines',
                                       line=dict(color='rgba(0,0,0,1)',
                                                 width=1)
                                      )
+        
         # https://stackoverflow.com/questions/68187485/subplot-for-go-figure-objects-with-multiple-plots-within-them
         for t in streamlines.data:
             fig.append_trace(t, row=1, col=1)
             fig.append_trace(t, row=1, col=2)
             fig.append_trace(t, row=2, col=2)
-        for t in potentiallines.data:
-            fig.append_trace(t, row=2, col=1)
+
+
+        ## Uncomment for lines in the potential plot 
+        # for t in potentiallines.data:
+        #     fig.append_trace(t, row=2, col=1)
 
         ## Plot flow element origins
         rows, cols = fig._get_subplot_rows_columns()    ## rows, cols are range, not int
