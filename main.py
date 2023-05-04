@@ -19,7 +19,6 @@ import potentialflowvisualizer as pfv
 from src.flowfield import Flowfield
 from src.commondicts import PRESET_DEFAULT_DICT, ELEMENT_DEFAULT_DICT
 from src.commonfuncs import flow_element_type
-import copy
 
 #### =================== ####
 #### Session Information ####
@@ -33,7 +32,6 @@ def initialize_session_state():
                     "ymax": 2.0,
                     "xsteps": 100,
                     "field": Flowfield(),
-                    "update_trigger": False,
                     "figs": {},
                     "colorscheme": "rainbow",
                     "n_contour_lines": 15,
@@ -49,12 +47,9 @@ def initialize_session_state():
 
 initialize_session_state()
 
-#### ================== ####
-#### Update Information ####
-#### ================== ####
-def update():
-    pass
-
+#### =========== ####
+#### Draw Graphs ####
+#### =========== ####
 def draw():
 
     ## Recalculate gridpoint positions
@@ -98,7 +93,7 @@ st.markdown(footer, unsafe_allow_html=True)
 ## =========== ##
 ## Sidebar Tab ##
 ## =========== ##
-## Buttons to clear and update in sidebar
+## Buttons to clear and draw in sidebar
 sb_col1, sb_col2 = st.sidebar.columns([1,1]) # sb = sidebar
 with sb_col1:
     if st.button("Clear Flow"):
@@ -110,8 +105,8 @@ with sb_col2:
         draw()
 
 ## Create sidebar tabs
-welcome, graphing, add_element, presets = st.sidebar.tabs(
-    ["Welcome", "Graphing", "Add Flow Element", "Generic Flows"]
+welcome, add_element, presets, settings = st.sidebar.tabs(
+    ["Welcome", "Add Flow Element", "Generic Flows", "Settings"]
 )
 
 ## Welcome sidebar tab
@@ -125,7 +120,7 @@ with welcome:
     st.image("images/TU_Delft_Logo.png", width=200)
 
 ## Graphing Sidebar tab
-with graphing:
+with settings:
     st.header("Layout")
     st.session_state["colorscheme"]               = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
     st.session_state["n_contour_lines"]           = st.number_input("Number of filled contours", value=15, min_value=5)
@@ -134,13 +129,11 @@ with graphing:
 
     st.markdown("""----""")
     st.header("Grid")
-    st.session_state["xmin"]   = st.number_input("x minimum", value=-2.0)
-    st.session_state["xmax"]   = st.number_input("x maximum", value=2.0)
-    st.session_state["ymin"]   = st.number_input("y minimum", value=-2.0)
-    st.session_state["ymax"]   = st.number_input("y maximum", value=2.0)
-    st.session_state["xsteps"] = st.number_input("x-steps on the grid", value=100, min_value=50)
-
-    update()
+    st.session_state["xmin"]   = st.number_input("$x$ minimum", value=-2.0)
+    st.session_state["xmax"]   = st.number_input("$x$ maximum", value=2.0)
+    st.session_state["ymin"]   = st.number_input("$y$ minimum", value=-2.0)
+    st.session_state["ymax"]   = st.number_input("$y$ maximum", value=2.0)
+    st.session_state["xsteps"] = st.number_input("$x$-steps on the grid", value=100, min_value=50)
 
 ## Add element sidebar tab
 with add_element:
@@ -187,7 +180,6 @@ with add_element:
             st.session_state["field"].objects[name] = elem(*args)
 
             st.markdown(f'Added {name}')
-            update()
 
         else:
             st.markdown(f'Did not add element -- check that Source/Sink position does not conflict with already existing Source/Sink positions')
@@ -217,7 +209,6 @@ with presets:
             st.session_state["field"].objects[name] = elem(*args[i])
 
             st.markdown(f'Added {name}')
-        update()
 
 ## =========== ##
 ## Main Screen ##
@@ -255,7 +246,5 @@ if not len(st.session_state["field"].objects) == 0:
             # Remove first, then add: if not, then del (...) will remove all entries with the same name!
             del st.session_state["field"].objects[k_old]
             st.session_state["field"].objects[k_new] = elem
-
-        update()
 
     st.markdown("""----""")

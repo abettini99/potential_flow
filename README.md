@@ -8,9 +8,9 @@ You can launch a web instance of the application through [this link](https://ae2
 
 The functionality is very straightforward:
 * Use the `Clear Flow` and `Draw Flow` buttons to clear or draw the flow elements. Make sure to draw the plot whenever you add new flow elements.
-* Use the `Graphing` tab to change the domain and mesh of the plots, and to adjust the looks of the plots.
 * Add individual flow elements in the `Add Flow Element` tab.
 * Add pre-defined combinations of elements in the `Add Generic Flows` tab.
+* Use the `Settings` tab to change the domain and mesh of the plots, and to adjust the looks of the plots.
 * Below the plots, a dropdown menu will allow you to adjust previously added flow elements. The numbers are automatically adjusted once you put them in. You will need to manually redraw the plot however.
 
 ---

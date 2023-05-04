@@ -132,6 +132,8 @@ class Flowfield:
                       row=1, col=1
                      )
 
+        #### Impose contour lines from the streamfunction field onto the x-velocity field
+        #### It is an alternative option to ff.create_streamline()!
         # min = np.nanpercentile(streamfunction, 5)
         # max = np.nanpercentile(streamfunction, 95)
         # fig.add_trace(go.Contour(x=x_points, y=y_points, z=np.reshape(streamfunction, X.shape),

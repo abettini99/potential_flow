@@ -23,8 +23,8 @@ String name used in main.py for adding presets to the flow.
 """
 ## TODO: Default values for presets
 PRESET_DEFAULT_DICT = {
-    "Cylinder"          : [pfv.Freestream(1, 0), pfv.Doublet(1*(2*m.pi*1), 0, 0, m.pi)],
-    "Rotating Cylinder" : [pfv.Freestream(1, 0), pfv.Doublet(1*(2*m.pi*1), 0, 0, m.pi), pfv.Vortex(4*m.pi*1*1, 0, 0)],
+    "Cylinder"          : [pfv.Freestream(1, 0), pfv.Doublet(2*m.pi, 0, 0, m.pi)],
+    "Rotating Cylinder" : [pfv.Freestream(1, 0), pfv.Doublet(2*m.pi, 0, 0, m.pi), pfv.Vortex(4*m.pi, 0, 0)],
 }
 
 """
