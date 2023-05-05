@@ -17,9 +17,8 @@ import streamlit as st
 import plotly.express as px
 import potentialflowvisualizer as pfv
 from src.flowfield import Flowfield
-from src.commondicts import PRESET_DICT, ELEMENT_DEFAULT_DICT
+from src.commondicts import PRESET_DEFAULT_DICT, ELEMENT_DEFAULT_DICT
 from src.commonfuncs import flow_element_type
-import copy
 
 #### =================== ####
 #### Session Information ####
@@ -27,16 +26,17 @@ import copy
 COLOR_SCHEMES = sorted(px.colors.named_colorscales())
 
 def initialize_session_state():
-    default_dict = {"xmin": -1.0,
-                    "xmax": 1.0,
-                    "ymin": -1.0,
-                    "ymax": 1.0,
-                    "xsteps": 300,
+    default_dict = {"xmin": -2.0,
+                    "xmax": 2.0,
+                    "ymin": -2.0,
+                    "ymax": 2.0,
+                    "xsteps": 100,
                     "field": Flowfield(),
-                    "update_trigger": False,
                     "figs": {},
                     "colorscheme": "rainbow",
                     "n_contour_lines": 15,
+                    "n_streamline_density": 0.5,
+                    "potential_streamline_bool": False
                    }
 
     for key, val in default_dict.items():
@@ -47,10 +47,11 @@ def initialize_session_state():
 
 initialize_session_state()
 
-#### ================== ####
-#### Update Information ####
-#### ================== ####
-def update():
+#### =========== ####
+#### Draw Graphs ####
+#### =========== ####
+def draw():
+
     ## Recalculate gridpoint positions
     y_steps = int(st.session_state["xsteps"]
                   * (st.session_state["ymax"] - st.session_state["ymin"])
@@ -62,12 +63,13 @@ def update():
     ## Clear dictionary of figures to display and redraw them
     st.session_state["figs"].clear()
 
-    st.session_state["figs"][f"Graphs"] = st.session_state["field"].draw(x_points=x_points,
-                                                                         y_points=y_points,
-                                                                         colorscheme=st.session_state["colorscheme"],
-                                                                         n_contour_lines=st.session_state["n_contour_lines"],
+    st.session_state["figs"][f"Graphs"] = st.session_state["field"].draw(x_points                  = x_points,
+                                                                         y_points                  = y_points,
+                                                                         colorscheme               = st.session_state["colorscheme"],
+                                                                         n_contour_lines           = st.session_state["n_contour_lines"],
+                                                                         n_streamline_density      = st.session_state["n_streamline_density"],
+                                                                         potential_streamline_bool = st.session_state["potential_streamline_bool"]
                                                                         )
-    return
 
 #### ================ ####
 #### Main application ####
@@ -91,19 +93,20 @@ st.markdown(footer, unsafe_allow_html=True)
 ## =========== ##
 ## Sidebar Tab ##
 ## =========== ##
-## Buttons to clear and update in sidebar
+## Buttons to clear and draw in sidebar
 sb_col1, sb_col2 = st.sidebar.columns([1,1]) # sb = sidebar
 with sb_col1:
     if st.button("Clear Flow"):
         st.session_state["field"].objects.clear()
-        update()
+        draw()
+
 with sb_col2:
-    if st.button("Update Flow"):
-        update()
+    if st.button("Draw Flow"):
+        draw()
 
 ## Create sidebar tabs
-welcome, graphing, add_element, presets = st.sidebar.tabs(
-    ["Welcome", "Graphing", "Add Flow Element", "Generic Flows"]
+welcome, add_element, presets, settings = st.sidebar.tabs(
+    ["Welcome", "Add Flow Element", "Generic Flows", "Settings"]
 )
 
 ## Welcome sidebar tab
@@ -117,63 +120,97 @@ with welcome:
     st.image("images/TU_Delft_Logo.png", width=200)
 
 ## Graphing Sidebar tab
-with graphing:
+with settings:
     st.header("Layout")
-    st.session_state["colorscheme"]         = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
-    st.session_state["n_contour_lines"]     = st.number_input("Number of contour lines", value=15)
+    st.session_state["colorscheme"]               = st.selectbox("Color scheme", options=COLOR_SCHEMES, index=COLOR_SCHEMES.index("rainbow"))
+    st.session_state["n_contour_lines"]           = st.number_input("Number of filled contours", value=15, min_value=5)
+    st.session_state["n_streamline_density"]      = st.number_input("Streamline density", value=0.5, min_value=0.01)
+    st.session_state["potential_streamline_bool"] = st.checkbox("Potential 'streamlines'", value=False)
 
     st.markdown("""----""")
     st.header("Grid")
-    st.session_state["xmin"]                = st.number_input("x minimum", value=-1.0)
-    st.session_state["xmax"]                = st.number_input("x maximum", value=1.0)
-    st.session_state["ymin"]                = st.number_input("y minimum", value=-1.0)
-    st.session_state["ymax"]                = st.number_input("y maximum", value=1.0)
-    st.session_state["xsteps"]              = st.number_input("x-steps on the grid", value=300)
+    st.session_state["xmin"]   = st.number_input("$x$ minimum", max_value=st.session_state["xmax"]-0.01, value=-2.0)
+    st.session_state["xmax"]   = st.number_input("$x$ maximum", min_value=st.session_state["xmin"]+0.01, value=2.0)
+    st.session_state["ymin"]   = st.number_input("$y$ minimum", max_value=st.session_state["ymax"]-0.01, value=-2.0)
+    st.session_state["ymax"]   = st.number_input("$y$ maximum", min_value=st.session_state["ymin"]+0.01, value=2.0)
+    st.session_state["xsteps"] = st.number_input("$x$-steps on the grid", value=100, min_value=50)
 
-    update()
-
-def adjust_objects(objects, id=None):
-    for flowobj in objects:
-        ## Add divider
-        st.markdown("""----""")
-        ## Extra divider in case a preset is used
-        if id == "preset":
-            st.subheader(flow_element_type(obj))
-        ## Fields to be edited
-        for key, val in flowobj.__dict__.items():
-            flowobj.__dict__[key] = st.number_input(f"{key}", value=float(val), key=f"{id}_{key}_{flowobj}")
-    return
-
-## TODO: ASK SIMON TO ANNOTATE BELOW
 ## Add element sidebar tab
 with add_element:
+    # Get user input on what element to add
     key = st.selectbox("Select Flow Element", options=ELEMENT_DEFAULT_DICT.keys())
 
-    try:
-        flowobj = copy.deepcopy(ELEMENT_DEFAULT_DICT[key])
-        name    = adjust_objects([flowobj], "element")
-        if st.button("Add ", key="add_element"):
-            st.session_state["field"].objects.extend([flowobj])
-            update()
+    # Retrieve necessary arguments for class using default values from a default element
+    proto_elem  = ELEMENT_DEFAULT_DICT[key]
+    args        = [None]*len(proto_elem.__dict__)
+    # Create input fields
+    for i, (k, v) in enumerate(proto_elem.__dict__.items()):
+        # usually strength has some condition, i.e. Sources / Sinks are defined by their sign, so we add case studies
+        if k == 'strength':
+            if   flow_element_type(proto_elem) == 'Source':
+                args[i] = st.number_input(f"{k}", value=float(v), min_value= 0.01, key=f"addelement_{key}_{i}")
+            elif flow_element_type(proto_elem) == 'Sink':
+                args[i] = st.number_input(f"{k}", value=float(v), max_value=-0.01, key=f"addelement_{key}_{i}")
+            else:
+                args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
+        # otherwise it is inputs
+        else:
+            args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
 
-    except KeyError:
-        pass
+    # Add element
+    if st.button("Add", key="add_element"):
+        add_authority = True
+
+        ## Ensure Source / Sink overlap does not happen, as it causes an issue with ff.create_streamline()
+        if flow_element_type(proto_elem) == 'Source' or flow_element_type(proto_elem) == 'Sink':
+            keys = list(st.session_state["field"].objects.keys())
+            for key in keys:
+                elem = st.session_state["field"].objects[key]
+                # Compare arguments with all other sources/sink
+                if flow_element_type(elem) == 'Source' or flow_element_type(elem) == 'Sink':
+                    x0 = args[0]; y0 = args[1]                # Wish it could be more elegant, but this works.
+                    x1 = elem.x;  y1 = elem.y
+
+                    if abs(x0-x1) < 0.01 or abs(y0-y1) < 0.01:
+                        add_authority = False
+
+        ## Add item to flowfield dictionary
+        if add_authority:
+            elem = proto_elem.__class__
+            num  = len(st.session_state["field"].objects) + 1
+            name = f"{num}. [{flow_element_type(proto_elem)}]"
+            st.session_state["field"].objects[name] = elem(*args)
+
+            st.markdown(f'Added {name}')
+
+        else:
+            st.markdown(f'Did not add element -- check that Source/Sink position does not conflict with already existing Source/Sink positions')
 
 ## Add preset sidebar tab
 with presets:
-    key = st.selectbox("Select Preset", options=PRESET_DICT.keys())
+    # Get user input on what preset to add
+    key = st.selectbox("Select Preset", options=PRESET_DEFAULT_DICT.keys())
 
-    try:
-        objects = PRESET_DICT[key]
-        for i, obj in enumerate(objects):
-            name = adjust_objects([obj], "preset")
+    # Retrieve necessary arguments for preset using default values from default elements
+    proto_preset = PRESET_DEFAULT_DICT[key] # proto_preset is a list of elements
+    args         = [None]*len(proto_preset)
+    for i, proto_elem in enumerate(proto_preset):
+        args[i]  = [None]*len(proto_elem.__dict__)
 
-        if st.button("Add ", key="add_preset"):
-            st.session_state["field"].objects.extend(objects)
-            update()
+        # Subdivide all elements that make up the preset via a header
+        st.subheader(flow_element_type(proto_elem))
+        for j, (k, v) in enumerate(proto_elem.__dict__.items()):
+            args[i][j] = st.number_input(f"{k}", value=float(v), key=f"addpreset_{key}_{i}_{j}")
 
-    except KeyError:
-        pass
+    # Add preset
+    if st.button("Add ", key="add_preset"):
+        for i, proto_elem in enumerate(proto_preset):
+            elem = proto_elem.__class__
+            num  = len(st.session_state["field"].objects) + 1
+            name = f"{num}. [{flow_element_type(proto_elem)}]"
+            st.session_state["field"].objects[name] = elem(*args[i])
+
+            st.markdown(f'Added {name}')
 
 ## =========== ##
 ## Main Screen ##
@@ -184,26 +221,44 @@ st.markdown('Hover over the graph to see information on the shown field itself, 
 for title, fig in st.session_state["figs"].items():
     st.plotly_chart(fig)
 
-## Adjust the flow elemetns
+## Adjust the flow elements
 if not len(st.session_state["field"].objects) == 0:
     st.markdown("""----""")
     st.subheader("Adjust your flow elements")
 
-    dropdown_dict = {}
-    for i, obj in enumerate(st.session_state["field"].objects):
-        dropdown_dict[f"{i + 1}. [{flow_element_type(obj)}]"] = obj
+    key     = st.selectbox("Select Flow Element", options=st.session_state["field"].objects.keys(), key='adjust_selectbox')
+    elem    = st.session_state["field"].objects[key]
 
-    key     = st.selectbox("Select Flow Element", options=dropdown_dict.keys())
-    flowobj = dropdown_dict[key]
-    name    = adjust_objects([flowobj], "adjust")
+    # Adjustment field
+    for k, v in elem.__dict__.items():
+        # usually strength has some condition, i.e. Sources / Sinks are defined by their sign, so we add case studies
+        if k == 'strength':
+            if   flow_element_type(elem) == 'Source':
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), min_value= 0.01, key=f"adjust_{elem}_{k}")
+            elif flow_element_type(elem) == 'Sink':
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), max_value=-0.01, key=f"adjust_{elem}_{k}")
+            else:
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
+        # otherwise it is inputs
+        else:
+            elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
 
-    ae_col1, ae_col2 = st.columns([1,1]) # ae = adjust element
-    with ae_col1:
-        if st.button("Update Flow", key="update"):
-            update()
-    with ae_col2:
-        if st.button("Remove Flow", key="remove"):
-            st.session_state["field"].objects.remove(flowobj)
-            update()
+
+
+    # Removal field
+    if st.button("Remove Flow", key="remove"):
+
+        del st.session_state["field"].objects[key]
+        st.markdown(f'Removed {key}')
+
+        ## Rename all keys such that numbering is correct
+        old_keys = list(st.session_state["field"].objects.keys()) # Ensure that the keys aren't changed at the same time as entries (hence the list)
+        for i, k_old in enumerate( old_keys ):
+            elem = st.session_state["field"].objects[k_old]
+            k_new = f'{i+1}. [{flow_element_type(elem)}]'
+
+            # Remove first, then add: if not, then del (...) will remove all entries with the same name!
+            del st.session_state["field"].objects[k_old]
+            st.session_state["field"].objects[k_new] = elem
 
     st.markdown("""----""")
