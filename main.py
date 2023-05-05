@@ -129,10 +129,10 @@ with settings:
 
     st.markdown("""----""")
     st.header("Grid")
-    st.session_state["xmin"]   = st.number_input("$x$ minimum", value=-2.0)
-    st.session_state["xmax"]   = st.number_input("$x$ maximum", value=2.0)
-    st.session_state["ymin"]   = st.number_input("$y$ minimum", value=-2.0)
-    st.session_state["ymax"]   = st.number_input("$y$ maximum", value=2.0)
+    st.session_state["xmin"]   = st.number_input("$x$ minimum", max_value=st.session_state["xmax"]-0.01, value=-2.0)
+    st.session_state["xmax"]   = st.number_input("$x$ maximum", min_value=st.session_state["xmin"]+0.01, value=2.0)
+    st.session_state["ymin"]   = st.number_input("$y$ minimum", max_value=st.session_state["ymax"]-0.01, value=-2.0)
+    st.session_state["ymax"]   = st.number_input("$y$ maximum", min_value=st.session_state["ymin"]+0.01, value=2.0)
     st.session_state["xsteps"] = st.number_input("$x$-steps on the grid", value=100, min_value=50)
 
 ## Add element sidebar tab
@@ -151,6 +151,8 @@ with add_element:
                 args[i] = st.number_input(f"{k}", value=float(v), min_value= 0.01, key=f"addelement_{key}_{i}")
             elif flow_element_type(proto_elem) == 'Sink':
                 args[i] = st.number_input(f"{k}", value=float(v), max_value=-0.01, key=f"addelement_{key}_{i}")
+            else:
+                args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
         # otherwise it is inputs
         else:
             args[i] = st.number_input(f"{k}", value=float(v), key=f"addelement_{key}_{i}")
@@ -229,7 +231,19 @@ if not len(st.session_state["field"].objects) == 0:
 
     # Adjustment field
     for k, v in elem.__dict__.items():
-        elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
+        # usually strength has some condition, i.e. Sources / Sinks are defined by their sign, so we add case studies
+        if k == 'strength':
+            if   flow_element_type(elem) == 'Source':
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), min_value= 0.01, key=f"adjust_{elem}_{k}")
+            elif flow_element_type(elem) == 'Sink':
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), max_value=-0.01, key=f"adjust_{elem}_{k}")
+            else:
+                elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
+        # otherwise it is inputs
+        else:
+            elem.__dict__[k] = st.number_input(f"{k}", value=float(v), key=f"adjust_{elem}_{k}")
+
+
 
     # Removal field
     if st.button("Remove Flow", key="remove"):
