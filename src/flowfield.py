@@ -6,6 +6,7 @@ import numpy as np
 import plotly as ply
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import src.plotly_streamline as strline
 import plotly.io as pio
 from plotly.subplots import make_subplots
 from src.commondicts import TYPE_NAME_DICT, LONG_NAME_DICT
@@ -133,7 +134,7 @@ class Flowfield:
                      )
 
         #### Impose contour lines from the streamfunction field onto the x-velocity field
-        #### It is an alternative option to ff.create_streamline()!
+        #### It is an alternative option to strline.create_streamline()!
         # min = np.nanpercentile(streamfunction, 5)
         # max = np.nanpercentile(streamfunction, 95)
         # fig.add_trace(go.Contour(x=x_points, y=y_points, z=np.reshape(streamfunction, X.shape),
@@ -235,12 +236,12 @@ class Flowfield:
                                                y         = 0.23,
                                                ypad      = 0
                                               ),
-                                ),
+                                 ),
                       row=2, col=2
                      )
 
 
-        streamlines = ff.create_streamline(x_points, -y_points,                                  # for some reason, we need the x-axis reflection, so we need negative y
+        streamlines = strline.create_streamline(x_points, -y_points,                                  # for some reason, we need the x-axis reflection, so we need negative y
                                       np.reshape(x_vels, X.shape), -np.reshape(y_vels, Y.shape), # for some reason, we need the x-axis reflection, so we need negative y
                                       density=n_streamline_density,
                                       hoverinfo='skip',
@@ -249,7 +250,7 @@ class Flowfield:
                                                 width=1)
                                      )
         if potential_streamline_bool:
-            potentiallines = ff.create_streamline(x_points, y_points,
+            potentiallines = strline.create_streamline(x_points, y_points,
                                           np.reshape(y_vels, Y.shape), -(np.reshape(x_vels, X.shape)),
                                           density=n_streamline_density,
                                           arrow_scale=0.00001,
