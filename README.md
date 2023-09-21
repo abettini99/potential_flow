@@ -28,7 +28,7 @@ git clone https://github.com/abettini99/potential_flow_tool.git
 Install the required dependencies using
 
 ```bash
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 The application relies on an adapted version of the python package [PotentialFlowVisualiser](https://pypi.org/project/PotentialFlowVisualizer/) for most of the backend and uses [Streamlit](https://streamlit.io/) for building the app itself.
 
@@ -36,7 +36,7 @@ The application relies on an adapted version of the python package [PotentialFlo
 To run the code, execute the following command on terminal/prompt:
 
 ```bash
-python3 -m streamlit run main.py
+python -m streamlit run main.py
 ```
 
 or execute the following command if you are utilizing anaconda:
