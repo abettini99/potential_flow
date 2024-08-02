@@ -12,9 +12,25 @@ def source():
     V_r = \\frac{\\Lambda}{2\\pi r}
     $$
     EXAMPLE TEXT: \n
-    LOREM LOREM LOREM
+    bla bla bla
+    ''',mathjax=True),
+
+    html.Label('Strength Slider:'),
+    dcc.Slider(-2, 2,
+               value=1,
+               id='Lambda_strength',
+              ),
+
+    dcc.Markdown('''
+    bla bla bla bla bla, velocity graph
+    ''',mathjax=True),
+    dcc.Graph(id='Velocity-Graph', mathjax=True),
+
+    dcc.Markdown('''
+    bla bla bla bla bla, potential graph
     ''',mathjax=True),
 
 
+    dcc.Graph(id='Potential-Graph', mathjax=True),
 
     ])

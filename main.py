@@ -23,6 +23,7 @@ from src.pages.doublet import doublet
 from src.pages.vortex import vortex
 from src.pages.cylinder import cylinder
 from src.pages.panel import panel
+from src.plots.plotSource import plotSource
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -68,12 +69,15 @@ sidebar = html.Div([
 #### =========== ####
 #### Application ####
 #### =========== ####
-app        = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app        = dash.Dash(__name__,
+                       external_stylesheets=[dbc.themes.BOOTSTRAP],
+                       suppress_callback_exceptions=True)
 content    = html.Div(id="page-content", style=CONTENT_STYLE)
 app.layout = html.Div([dcc.Location(id="url"),
                        sidebar,
                        content])
 
+## App callable for main app 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if   pathname == f"/":
@@ -90,6 +94,24 @@ def render_page_content(pathname):
         return cylinder()
     elif pathname == f"/panel":
         return panel()
+
+## App callables for uniform page
+
+## App callables for source page
+@app.callback(Output('Velocity-Graph','figure'),
+              Output('Potential-Graph','figure'),
+              Input('Lambda_strength','value')
+             )
+def updateSourceFigures(Lambda):
+    return plotSource([-1,1], [-1,1], [0,0], Lambda)
+
+## App callables for doublet page
+
+## App callables for vortex page
+
+## App callables for cylinder page
+
+## App callables for panel method page
 
 if __name__ == '__main__':
     app.run_server(debug=True)
