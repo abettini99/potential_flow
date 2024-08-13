@@ -2,3 +2,5 @@ numpy
 plotly
 dash
 dash-bootstrap-components
+pyinstaller
+waitress

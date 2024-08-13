@@ -3,7 +3,7 @@
 
 """
 Authors:       A. Bettini
-Last Modified: 2024-08-01
+Last Modified: 2024-08-12
 
 Incompressible flow visualizer.
 Utilizes dash for user interface, whereas plotly is used for plotting.
@@ -42,7 +42,8 @@ SIDEBAR_STYLE = {
     "backgroundColor" : "#2b2b2b",
     "color"           : "#cfcfcf",
     "fontSize"        : "23px",
-    "boxShadow"       : "5px 5px 5px 5px lightgrey"
+    "boxShadow"       : "5px 5px 5px 5px lightgrey",
+    "overflow"        : "scroll"
 }
 
 CONTENT_STYLE = {
@@ -57,8 +58,8 @@ sidebar = html.Div([
         html.Hr(),
         dbc.Nav(
             [
-                dbc.NavLink("Home",            href="/",              active="exact"),
-                dbc.NavLink("Preliminaries",   href="/preliminaries", active="exact"),
+                dbc.NavLink("Home",            href="/",        active="exact"),
+                dbc.NavLink("Preliminaries",   href="/prelims", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -67,8 +68,8 @@ sidebar = html.Div([
         html.H3(f"Fundamental Theory", className="lead", style={'fontSize' : '24px'}),
         dbc.Nav(
             [
-                dbc.NavLink("Navier-Stokes",   href="/ns",             active="exact"),
-                dbc.NavLink("Potential Flow",  href="/potential-flow", active="exact"),
+                dbc.NavLink("Navier-Stokes",   href="/ns",       active="exact"),
+                dbc.NavLink("Potential Flow",  href="/pot-flow", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -79,7 +80,7 @@ sidebar = html.Div([
             [
                 dbc.NavLink("Uniform Flows",  href="/uniform", active="exact"),
                 dbc.NavLink("Source Flows",   href="/source",  active="exact"),
-                dbc.NavLink("Doublets",       href="/doublet",  active="exact"),
+                dbc.NavLink("Doublets",       href="/doublet", active="exact"),
                 dbc.NavLink("Vortex Flows",   href="/vortex",  active="exact"),
             ],
             vertical=True,
@@ -118,6 +119,7 @@ content    = html.Div(id="page-content", style=CONTENT_STYLE)
 app.layout = html.Div([dcc.Location(id="url"),
                        sidebar,
                        content])
+server     = app.server # Added so that the app can be served using waitress.
 
 #### ============= ####
 #### app CALLABLES ####
@@ -130,7 +132,13 @@ app.layout = html.Div([dcc.Location(id="url"),
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if   pathname == f"/":
-        return home() 
+        return home()
+    elif pathname == f"/prelims":
+        pass
+    elif pathname == f"/ns":
+        pass
+    elif pathname == f"/pot-flow":
+        pass
     elif pathname == f"/uniform":
         return uniform() 
     elif pathname == f"/source":
@@ -233,5 +241,12 @@ def updateRotatingCylinderFigure(Vinf, radius, Gamma):
 ## App callables for panel method page ##
 ## ----------------------------------- ##
 
+## =================== ##
+## Main code execution ##
+## =================== ##
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    ## For DEBUG
+    # app.run_server(debug=True)
+
+    ## For PROD
+    app.run_server(debug=False)
