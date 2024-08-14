@@ -28,12 +28,12 @@ def uniform():
     bla bla bla
     ''',mathjax=True),
 
-    html.Label('Freestream Velocity Slider:'),
+    html.Label('Freestream Speed Slider:'),
     dcc.Slider(0.1, 2,
                value=1,
                id='VelInfMag',
               ),
-    html.Label('Freestream Velocity Angle Slider:'),
+    html.Label('Freestream Angle Slider:'),
     dcc.Slider(-np.pi, np.pi,
                value=0,
                id='VelInfTheta',
