@@ -27,11 +27,11 @@ def plotRankine(Lx, Ly, strength, Vinf, separation):
     ## MAIN CALCULATIONS ##
     ## ================= ##
     # Internal variable setup
-    b = separation/2
+    b        = separation/2
 
     # Create 2D grid, represented using two 1D arrays
-    x = np.linspace(Lx[0], Lx[1], 50)
-    y = np.linspace(Ly[0], Ly[1], 50)
+    x        = np.linspace(Lx[0], Lx[1], 50)
+    y        = np.linspace(Ly[0], Ly[1], 50)
     
     # Get distance to point for each gridpoint
     XX, YY   = np.meshgrid(x,y)

@@ -24,8 +24,8 @@ def plotRotatingCylinder(Lx, Ly, Vinf, cylinderRadius, strength):
     ## MAIN CALCULATIONS ##
     ## ================= ##
     # Create 2D grid, represented using two 1D arrays
-    x = np.linspace(Lx[0], Lx[1], 50)
-    y = np.linspace(Ly[0], Ly[1], 50)
+    x        = np.linspace(Lx[0], Lx[1], 50)
+    y        = np.linspace(Ly[0], Ly[1], 50)
     
     # Get distance to point for each gridpoint
     XX, YY   = np.meshgrid(x,y)
@@ -49,8 +49,8 @@ def plotRotatingCylinder(Lx, Ly, Vinf, cylinderRadius, strength):
     rS       = cylinderRadius*np.ones(n) # Fairly simple for a cylinder
 
     # Get quantities along body contour
-    xS             = rS*np.cos(thetaS)
-    yS             = rS*np.sin(thetaS)
+    xS       = rS*np.cos(thetaS)
+    yS       = rS*np.sin(thetaS)
          
     VrS      =  (1 - cylinderRadius*cylinderRadius/(rS*rS))*Vinf*np.cos(thetaS)
     VthetaS  = -(1 + cylinderRadius*cylinderRadius/(rS*rS))*Vinf*np.sin(thetaS) - strength/(2*np.pi*cylinderRadius)

@@ -18,12 +18,12 @@ def plotSource(Lx, Ly, P, strength):
     ## MAIN CALCULATIONS ##
     ## ================= ##
     # Create 2D grid, represented using two 1D arrays
-    x = np.linspace(Lx[0], Lx[1], 50)
-    y = np.linspace(Ly[0], Ly[1], 50)
+    x        = np.linspace(Lx[0], Lx[1], 50)
+    y        = np.linspace(Ly[0], Ly[1], 50)
     
     # Get coordinates relative to origin of source
-    xP = x - P[0]
-    yP = y - P[1]
+    xP       = x - P[0]
+    yP       = y - P[1]
 
     # Get distance to point for each gridpoint
     XXP, YYP = np.meshgrid(xP,yP)

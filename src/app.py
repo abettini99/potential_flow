@@ -17,6 +17,9 @@ import numpy as np
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from src.pages.home import home
+from src.pages.preliminaries import preliminaries
+from src.pages.NavierStokes import NavierStokes
+from src.pages.potentialFlow import potentialFlowTheory
 from src.pages.uniform import uniform
 from src.pages.source import source
 from src.pages.doublet import doublet
@@ -58,8 +61,8 @@ sidebar = html.Div([
         html.Hr(),
         dbc.Nav(
             [
-                dbc.NavLink("Home",            href="/",        active="exact"),
-                dbc.NavLink("Preliminaries",   href="/prelims", active="exact"),
+                dbc.NavLink("Home",            href="/",              active="exact"),
+                dbc.NavLink("Preliminaries",   href="/preliminaries", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -133,12 +136,12 @@ server     = app.server # Added so that the app can be served using waitress.
 def render_page_content(pathname):
     if   pathname == f"/":
         return home()
-    elif pathname == f"/prelims":
-        pass
+    elif pathname == f"/preliminaries":
+        return preliminaries()
     elif pathname == f"/ns":
-        pass
+        return NavierStokes()
     elif pathname == f"/pot-flow":
-        pass
+        return potentialFlowTheory()
     elif pathname == f"/uniform":
         return uniform() 
     elif pathname == f"/source":
