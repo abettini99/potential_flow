@@ -16,24 +16,24 @@ from dash import html, dcc
 import numpy as np
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-from src.pages.home import home
-from src.pages.preliminaries import preliminaries
-from src.pages.NavierStokes import NavierStokes
-from src.pages.potentialFlow import potentialFlowTheory
-from src.pages.uniform import uniform
-from src.pages.source import source
-from src.pages.doublet import doublet
-from src.pages.vortex import vortex
-from src.pages.tat import tat
-from src.pages.panel import panel
-from src.plots.plotUniform import plotUniform
-from src.plots.plotSource import plotSource
-from src.plots.plotDoublet import plotDoublet
-from src.plots.plotVortex import plotVortex
-from src.plots.plotSourceUniform import plotSourceUniform
-from src.plots.plotRankine import plotRankine
-from src.plots.plotCylinder import plotCylinder
-from src.plots.plotRotatingCylinder import plotRotatingCylinder
+from pages.home import home
+from pages.preliminaries import preliminaries
+from pages.NavierStokes import NavierStokes
+from pages.potentialFlow import potentialFlowTheory
+from pages.uniform import uniform
+from pages.source import source
+from pages.doublet import doublet
+from pages.vortex import vortex
+from pages.tat import tat
+from pages.panel import panel
+from plots.plotUniform import plotUniform
+from plots.plotSource import plotSource
+from plots.plotDoublet import plotDoublet
+from plots.plotVortex import plotVortex
+from plots.plotSourceUniform import plotSourceUniform
+from plots.plotRankine import plotRankine
+from plots.plotCylinder import plotCylinder
+from plots.plotRotatingCylinder import plotRotatingCylinder
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",

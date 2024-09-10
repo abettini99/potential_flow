@@ -5,6 +5,8 @@ import dash_bootstrap_components as dbc
 def panel():
     return html.Div(children=[
 
-    html.H1("Panel Method")
-
-    ])
+    html.H1("Panel Method"),
+    dcc.Markdown("""
+    This page is work in progress.
+    
+    """, mathjax=True)])
