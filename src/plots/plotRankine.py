@@ -673,3 +673,15 @@ def plotRankine(Lx, Ly, strength, Vinf, separation):
     
     return fig1, fig2, fig3, fig4
 
+
+if __name__ == '__main__':
+    Lx        = [-3, 3]
+    Ly        = [-3, 3]
+    strength  = 1
+    Vinf      = 1
+    separation= 1
+    fig1, fig2, fig3, fig4 = plotRankine(Lx, Ly, strength, Vinf, separation)
+    fig1.show()
+    fig2.show()
+    fig3.show()
+    fig4.show()
