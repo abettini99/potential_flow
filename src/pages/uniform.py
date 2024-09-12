@@ -11,21 +11,27 @@ def uniform():
     #### ============== ####
     html.H1("Uniform Flow"),
 
-    dcc.Markdown('''
-    \\[...\\] \n
+   dcc.Markdown(r'''
                  
-    Very simple
-                 
+    Uniform flow is one of the simplest elementary flows, it has a certain constant magnitude $$V_{\infty}$$ and direction $$\theta_{\infty}$$. Its velocity potential and stream function
+    are given by
+
     $$
-    V_x = V_{\\infty} \\cos{\\theta_{\\infty}}\\,,
+    \phi = V_{\infty} \left[xcos\left(\theta_{\infty}\right) + ysin\left(\theta_{\infty}\right)\right]\\,
     $$
     $$
-    V_y = V_{\\infty} \\sin{\\theta_{\\infty}}\\,.
+    \Psi = V_{\infty} \left[y cos(\theta_{\infty}) - x sin(\theta_{\infty}) \right]
+    $$
+    
+    and its velocity components are then
+    $$
+    V_x = V_{\infty} cos{\theta_{\infty}}\\,
+    $$
+    $$
+    V_y = V_{\infty} sin{\theta_{\infty}}\\.
     $$
 
-    Which as a set of cartesian velocities can be found by      
-    EXAMPLE TEXT: \n
-    bla bla bla
+    
     ''',mathjax=True),
 
     html.Label('Freestream Speed Slider:'),
