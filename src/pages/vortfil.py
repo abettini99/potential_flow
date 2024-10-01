@@ -3,6 +3,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 class VortexFilament:
     def __init__(self, strength, point, vector,start=None, end=None, prop = None):
@@ -58,31 +59,83 @@ class VortexFilament:
     def split(self, Strengths, coord, angles):
         self.check_point_on_line(coord)
         self.end = coord
-        for i in angles:
-            if i>np.pi or i<np.pi:
-                i=i*np.pi/180
-            vec = np.array([self.vector[0]*np.cos(i)-self.vector[1]*np.sin(i),self.vector[0]*np.sin(i)+self.vector[1]*np.cos(i),0])
+        for i in range(len(angles)):
+            if angles[i]>np.pi or angles[i]<np.pi:
+                angles[i]=angles[i]*np.pi/180
+            vec = np.array([self.vector[0]*np.cos(angles[i])-self.vector[1]*np.sin(angles[i]),self.vector[0]*np.sin(angles[i])+self.vector[1]*np.cos(angles[i]),0])
             self.children.append(VortexFilament(Strengths[i]*self.Strength, coord, vec, start = coord,prop = Strengths[i]))
-    def bend(self, coord, vec):
+    def bend(self, coord, angle):
         self.check_point_on_line(coord)
         self.end = coord
+        if angle>np.pi or angle<np.pi:
+            angle=angle*np.pi/180
+        vec = np.array([self.vector[0]*np.cos(angle)-self.vector[1]*np.sin(angle),self.vector[0]*np.sin(angle)+self.vector[1]*np.cos(angle),0])
         self.children.append(VortexFilament(self.Strength, coord, vec, start = coord))
 
     def calc_vortex_family(self,parent_strength = None):
         if self.prop is not None and parent_strength is not None:
             self.Strength = self.prop*parent_strength
         for i in self.children:
-            i.draw_vortex_family(self.Strength)
-    def draw_vortex_family(self, limit_x, limit_y):
+            i.calc_vortex_family(self.Strength)
+        
+    def draw_vortex_family(self, limit_x, limit_y,fig=None):
         self.calc_vortex_family(self.Strength)
+        box = self.calculate_box_intersection(limit_x, limit_y)
         if self.start is not None and self.end is not None:
-            plt.plot([self.start[0],self.end[0]],[self.start[1],self.end[1]],'k')
+            limit = np.array([self.start[0],self.end[0],self.start[1],self.end[1]])
         elif self.start is not None and self.end is None:
-            plt.plot([self.start[0],self.Point[0]],[self.start[1],self.Point[1]],'k')
+            limit = np.array([self.start[0],box[1][0],self.start[1],box[1][1]])
         elif self.start is None and self.end is not None:
-            plt.plot([self.Point[0],self.end[0]],[self.Point[1],self.end[1]],'k')
+            limit = np.array([box[0][0],self.end[0],box[0][1],self.end[1]])
         else:
-            plt.plot([self.Point[0],self.Point[0]+self.vector[0]],[self.Point[1],self.Point[1]+self.vector[1]],'k')
+            limit = np.array([box[0][0],box[1][0],box[0][1],box[1][1]])
+        
+        # plt.plot(limit[:2],limit[2:])
+        if fig is None: 
+            fig = go.Figure()        
+            fig.update_layout(xaxis_title='X-axis',
+                              yaxis_title='Y-axis',
+                              title='Straight Line Plot'
+                              )
+            fig.update_xaxes(range=[limit_x[0], limit_x[1]])  # Set x-axis limits
+            fig.update_yaxes(range=[limit_y[0], limit_y[1]])  # Set y-axis limits
+        
+        # Add a trace for the straight line
+        fig.add_trace(go.Scatter(x=limit[:2], y=limit[2:], 
+                                mode='lines', 
+                                line=dict(color='blue', width=2),
+                                name='Straight Line'))
+        
+        # Set axis labels
+
+        for i in self.children:
+            i.draw_vortex_family(limit_x, limit_y, fig)
+        return fig
+
+    def calculate_box_intersection(self, limit_x, limit_y):
+        box_intersection = []
+        y_intersects = []
+        x_intersects = []
+        for i in limit_x:
+            y_intersects.append((i-self.Point[0])/self.vector[0]*self.vector[1]+self.Point[1])
+        for i in limit_y:
+            x_intersects.append((i-self.Point[1])/self.vector[1]*self.vector[0]+self.Point[0])
+        if y_intersects[0]>limit_y[0] and y_intersects[0]<limit_y[1]:
+            box_intersection.append([limit_x[0],y_intersects[0]])
+        if y_intersects[1]>limit_y[0] and y_intersects[1]<limit_y[1]:
+            box_intersection.append([limit_x[1],y_intersects[1]])
+        if x_intersects[0]>limit_x[0] and x_intersects[0]<limit_x[1]:
+            box_intersection.append([x_intersects[0],limit_y[0]])
+        if x_intersects[1]>limit_x[0] and x_intersects[1]<limit_x[1]:
+            box_intersection.append([x_intersects[1],limit_y[1]])
+        t_box = []
+        for i in box_intersection:
+            t_box.append((i[0]-self.Point[0])/self.vector[0])
+        if t_box[0]>t_box[1]:
+            box_intersection[0],box_intersection[1] = box_intersection[1],box_intersection[0]
+
+        return np.array(box_intersection)
+        
 
 class VortexFilamentCollection:
     def __init__(self):
@@ -96,59 +149,59 @@ def vortfil():
     #### ============== ####
     #### BUILDING BLOCK ####
     #### ============== ####
-    html.H1("Vrotex Filaments"),
+    html.H1("Vortex Filaments"),
 
     dcc.Markdown('''
     \\[...\\] \n
-                 
-    The velocity around a source/sink is then given by
-                 
+    Helmholtz's vortex theorems: \n
+    The circulation strength $\\Gamma$ remains constant along the filament \n
+    a vortex filament cannot end in the flow, but: \n
+    extends to infinity\n
+    ends at a boundary\n
+    forms a closed loop\n
+
+    Bior Savart Law: \n
+
     $$
-    V_r = \\frac{\\Lambda}{2\\pi r}\\,,
+    d\\vec{V} = \\frac{\\Gamma}{4\\pi} \\frac{d\\vec{l} \\times \\vec{r}}{|\\vec{r}|^3}
     $$
+    For a straight filament, the velocity field is given by: \n
     $$
-    V_\\theta = 0\\,.
+    \\vec{V} = \\frac{\\Gamma}{4\\pi} \\int_{A}^{B} \\frac{sin(\\theta)}{r^2} d\\vec{l}
     $$
 
-    Which as a set of cartesian velocities can be found by      
-    EXAMPLE TEXT: \n
-    bla bla bla
     ''',mathjax=True),
+    
+    html.H2("Vortex Filament tool"),
+    dcc.Markdown('''
+                 ''',mathjax=True),    
+    html.Div(
+        style={'display': 'flex', 'justifyContent': 'center', 'gap': '10px', 'alignItems': 'center', 'marginTop': '20px'},
+        children=[
+            html.Label('x:', style={'marginRight': '5px'}),
+            dcc.Input(id='x_point_intercept', type='number', step=0.1, value=0),
+            html.Label('y:', style={'marginLeft': '20px', 'marginRight': '5px'}),
+            dcc.Input(id='y_point_intercept', type='number', step=0.1, value=0)
+        ]),
 
+    html.Br(),
+    
     html.Label('Strength Slider:'),
     dcc.Slider(-2, 2,
                value=1,
-               id='sourceStrength1',
+               id='VortexStrength',
               ),
 
-    html.Label('Source Position:'),
-    dcc.Slider(-1, 1,
-               value=0,
-               id='Px',
-               marks={-1: {'label': '-1'},
-                       0: {'label': '0'},
-                       1: {'label': '1'}}
-              ),
-    dcc.Slider(-1, 1,
-               value=0,
-               id='Py',
-               marks={-1: {'label': '-1'},
-                       0: {'label': '0'},
-                       1: {'label': '1'}}
-              ),
+    html.Label('Angle Slider:    '),
+    dcc.Slider(-180, 180,
+                value=0,
+                id='VortexAngle',
+                ),
+
+    html.Button('Draw', id='draw-button', n_clicks=0),
 
     ## Graph updated via app.callable() in main.py
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='sourceV', mathjax=True),
-        ], width=6)
-    ], justify='center'),
-    ## Graph updated via app.callable() in main.py
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='sourcePS', mathjax=True),
-        ], width=4)
-    ], justify='center'),
+    dcc.Graph(id='vort', mathjax=True),
     
 
 
@@ -207,13 +260,11 @@ def vortfil():
     ])
 
 if __name__ == '__main__':
-    test = VortexFilament(1,[1,1,0],[1,-1,0])
-    print(test.calculate_h([0,0,0]))
-    print(test.calculate_velocity([0,0,0]))
-    print(test.calculate_velocity([2,2,0]))
-    test.start = np.array([1,1,0])
-    print(test.calculate_velocity([0,0,0]))
-    test.start = np.array([0,2,0])
-    print(test.calculate_velocity([0,0,0]))
-    print(test.check_point_on_line([-1,3,0]))
+    test = VortexFilament(1,[1,1,0],[0,1,0])
+    test.bend([1,1,0],-90)
+    test.children[0].bend([3,1,0],-90)
+    # test.end = [1,1,0]
+    test.draw_vortex_family([0,4],[0,4])
+    plt.show()
+    
     

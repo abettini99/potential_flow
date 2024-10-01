@@ -29,6 +29,7 @@ from src.pages.panel import panel
 from src.pages.liftline import liftline
 from src.pages.numliftline import numliftline
 from src.pages.vortfil import vortfil
+from src.pages.vortfil import VortexFilament
 from src.plots.plotUniform import plotUniform
 from src.plots.plotSource import plotSource
 from src.plots.plotDoublet import plotDoublet
@@ -250,6 +251,19 @@ def updateVortexFigure(Gamma):
              )
 def updateRotatingCylinderFigure(Vinf, radius, Gamma):
     return plotRotatingCylinder([-1,1], [-1,1], Vinf, radius, Gamma)
+
+
+@app.callback(Output('vort','figure'),
+              Input('x_point_intercept','value'),
+              Input('y_point_intercept','value'),
+              Input('VortexStrength','value'),
+              Input('VortexAngle','value'),
+              Input('draw-button','n_clicks')
+             )
+def updateVortex(x, y, Gamma, theta, n_clicks):
+    vec = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta)),0])
+    return VortexFilament(Gamma, [x,y,0],vec).draw_vortex_family([-2,2],[-2,2])
+    
 
 ## ----------------------------------- ##
 ## App callables for panel method page ##
