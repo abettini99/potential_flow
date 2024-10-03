@@ -26,6 +26,10 @@ from src.pages.doublet import doublet
 from src.pages.vortex import vortex
 from src.pages.tat import tat
 from src.pages.panel import panel
+from src.pages.liftline import liftline
+from src.pages.numliftline import numliftline
+from src.pages.vortfil import vortfil
+from src.pages.vortfil import VortexFilament
 from src.plots.plotUniform import plotUniform
 from src.plots.plotSource import plotSource
 from src.plots.plotDoublet import plotDoublet
@@ -103,7 +107,9 @@ sidebar = html.Div([
         html.H3(f"Wing Analysis", className="lead", style={'fontSize' : '24px'}),
         dbc.Nav(
             [
-                dbc.NavLink("TBD", href="/tbd", active="exact"),
+                dbc.NavLink("Vortex filaments", href="/vortfil", active="exact"),
+                dbc.NavLink("Lifting line theory", href="/liftline", active="exact"),
+                dbc.NavLink("Numerical lifting line", href="/numliftline", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -154,6 +160,12 @@ def render_page_content(pathname):
         return tat()
     elif pathname == f"/panel":
         return panel()
+    elif pathname == f"/vortfil":
+        return vortfil()
+    elif pathname == f"/liftline":
+        return liftline()
+    elif pathname == f"/numliftline":
+        return numliftline()
 
 ## ------------------------------ ##
 ## App callables for uniform page ##
@@ -239,6 +251,19 @@ def updateVortexFigure(Gamma):
              )
 def updateRotatingCylinderFigure(Vinf, radius, Gamma):
     return plotRotatingCylinder([-1,1], [-1,1], Vinf, radius, Gamma)
+
+
+@app.callback(Output('vort','figure'),
+              Input('x_point_intercept','value'),
+              Input('y_point_intercept','value'),
+              Input('VortexStrength','value'),
+              Input('VortexAngle','value'),
+              Input('draw-button','n_clicks')
+             )
+def updateVortex(x, y, Gamma, theta, n_clicks):
+    vec = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta)),0])
+    return VortexFilament(Gamma, [x,y,0],vec).draw_vortex_family([-2,2],[-2,2])
+    
 
 ## ----------------------------------- ##
 ## App callables for panel method page ##
