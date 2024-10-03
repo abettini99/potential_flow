@@ -12,8 +12,14 @@ class VortexFilament:
         self.Point = np.array(point)
         self.vector = np.array(vector)
         self.vector = self.vector/np.linalg.norm(self.vector)
-        self.start = start
-        self.end = end
+        if start is not None:
+            self.start = np.array(start)
+        else:
+            self.start = start
+        if end is not None:
+            self.end = np.array(end)
+        else:
+            self.end = end
         self.prop = prop
     def calculate_velocity(self, coord):
         h, sign= self.calculate_h(coord)
@@ -58,14 +64,16 @@ class VortexFilament:
         return True, mu[0]
     def split(self, Strengths, coord, angles):
         self.check_point_on_line(coord)
+        coord = np.array(coord)
         self.end = coord
         for i in range(len(angles)):
-            if angles[i]>np.pi or angles[i]<np.pi:
+            if angles[i]>np.pi or angles[i]<-np.pi:
                 angles[i]=angles[i]*np.pi/180
             vec = np.array([self.vector[0]*np.cos(angles[i])-self.vector[1]*np.sin(angles[i]),self.vector[0]*np.sin(angles[i])+self.vector[1]*np.cos(angles[i]),0])
             self.children.append(VortexFilament(Strengths[i]*self.Strength, coord, vec, start = coord,prop = Strengths[i]))
     def bend(self, coord, angle):
         self.check_point_on_line(coord)
+        coord = np.array(coord)
         self.end = coord
         if angle>np.pi or angle<np.pi:
             angle=angle*np.pi/180
@@ -101,7 +109,10 @@ class VortexFilament:
             fig.update_yaxes(range=[limit_y[0], limit_y[1]])  # Set y-axis limits
         
         # Add a trace for the straight line
-        fig.add_trace(go.Scatter(x=limit[:2], y=limit[2:], 
+        x_arr = np.linspace(limit[0], limit[1], 100)
+        y_arr = np.linspace(limit[2], limit[3], 100)
+
+        fig.add_trace(go.Scatter(x=x_arr, y=y_arr,
                                 mode='lines', 
                                 line=dict(color='blue', width=2),
                                 name='Straight Line'))
@@ -111,6 +122,40 @@ class VortexFilament:
         for i in self.children:
             i.draw_vortex_family(limit_x, limit_y, fig)
         return fig
+    
+    def to_dict(self):
+        # Convert the VortexFilament object to a dictionary for storage
+        dict = {
+            'Gamma': self.Strength,
+            'Point': self.Point.tolist(),  # Convert numpy arrays to lists
+            'vec': self.vector.tolist()  # Convert numpy arrays to lists
+        }
+        if self.start is not None:
+            dict['start'] = self.start.tolist()
+        else:
+            dict['start'] = None
+        if self.end is not None:
+            dict['end'] = self.end.tolist()
+        else:
+            dict['end'] = None
+        if self.prop is not None:
+            dict['prop'] = self.prop
+        else:
+            dict['prop'] = None
+        dict['children'] = []
+
+        for i in self.children:
+            dict['children'].append(i.to_dict())
+        return dict
+
+    @staticmethod
+    def from_dict(data):
+        # Recreate the VortexFilament object from a dictionary
+        vec = np.array(data['vec'])
+        obj = VortexFilament(data['Gamma'], data['Point'], vec, data['start'], data['end'], data['prop'])
+        for i in data['children']:
+            obj.children.append(VortexFilament.from_dict(i))
+        return obj
 
     def calculate_box_intersection(self, limit_x, limit_y):
         box_intersection = []
@@ -129,6 +174,7 @@ class VortexFilament:
         if x_intersects[1]>limit_x[0] and x_intersects[1]<limit_x[1]:
             box_intersection.append([x_intersects[1],limit_y[1]])
         t_box = []
+
         for i in box_intersection:
             t_box.append((i[0]-self.Point[0])/self.vector[0])
         if t_box[0]>t_box[1]:
@@ -185,6 +231,8 @@ def vortfil():
         ]),
 
     html.Br(),
+
+    dcc.Store(id='filam-store'),  # Hidden store for Filam object
     
     html.Label('Strength Slider:'),
     dcc.Slider(-2, 2,
@@ -201,8 +249,23 @@ def vortfil():
     html.Button('Draw', id='draw-button', n_clicks=0),
 
     ## Graph updated via app.callable() in main.py
-    dcc.Graph(id='vort', mathjax=True),
+    dcc.Graph(id='vort', config={'clickmode': 'event+select'}),  # Enable clickmode to select points
     
+    html.Div(id='selected-point-output'),  # Output the selected point here
+    html.Label('First split angle:'),
+    dcc.Slider(-180, 180,
+               value=1,
+               id='angle_1',
+              ),
+
+    html.Label('Angle Slider:    '),
+    dcc.Slider(-180, 180,
+                value=0,
+                id='angle_2',
+                ),
+    html.Button('Split', id='split-button', n_clicks=0),
+
+
 
 
     #### ============= ####
@@ -261,9 +324,14 @@ def vortfil():
 
 if __name__ == '__main__':
     test = VortexFilament(1,[1,1,0],[0,1,0])
-    test.bend([1,1,0],-90)
+    test.split([0.8,0,2],[1,1,0],[-90,90])
     test.children[0].bend([3,1,0],-90)
+    test.draw_vortex_family([0,4],[0,4])
+    plt.show()
     # test.end = [1,1,0]
+    dictionario = test.to_dict()
+    print(dictionario)
+    test = VortexFilament.from_dict(dictionario)
     test.draw_vortex_family([0,4],[0,4])
     plt.show()
     

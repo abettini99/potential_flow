@@ -15,7 +15,8 @@ import dash
 from dash import html, dcc
 import numpy as np
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import plotly.graph_objects as go
 from src.pages.home import home
 from src.pages.preliminaries import preliminaries
 from src.pages.NavierStokes import NavierStokes
@@ -251,18 +252,74 @@ def updateVortexFigure(Gamma):
              )
 def updateRotatingCylinderFigure(Vinf, radius, Gamma):
     return plotRotatingCylinder([-1,1], [-1,1], Vinf, radius, Gamma)
+@app.callback(
+    Output('vort', 'figure'),
+    Output('filam-store', 'data'),  # Store the Filam object
+    Input('draw-button', 'n_clicks'),  # Trigger based on the draw button click
+    Input('split-button', 'n_clicks'),  # Trigger based on the split button click
+    State('x_point_intercept', 'value'),  # Capture the current values but do not trigger on change
+    State('y_point_intercept', 'value'),
+    State('VortexStrength', 'value'),
+    State('VortexAngle', 'value'),
+    State('selected-point-output', 'children'),
+    State('angle_1', 'value'),
+    State('angle_2', 'value'),
+    State('filam-store', 'data')  # Get the current stored Filam object
+)
+def handle_vortex_operations(draw_clicks, split_clicks, x, y, Gamma, theta, selected_point, angle_1, angle_2, data):
+    # Determine if we are drawing a new vortex or splitting the existing one
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        # If nothing has triggered the callback yet, return empty figure and no change in data
+        return go.Figure(), data
+
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if button_id == 'draw-button' and draw_clicks:
+        # Drawing the vortex filament
+        vec = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta)), 0])
+        Filam = VortexFilament(Gamma, [x, y, 0], vec)
+        Filam_dict = Filam.to_dict()
+        return Filam.draw_vortex_family([-2, 2], [-2, 2]), Filam_dict
+
+    elif button_id == 'split-button' and split_clicks:
+        # Splitting the vortex filament
+        if data is None:
+            # No existing vortex filament data
+            return go.Figure(), data
+
+        # Extract the selected point's x and y coordinates from the text
+        selected_x = float(selected_point.split(',')[0].split('=')[1])
+        selected_y = float(selected_point.split(',')[1].split('=')[1])
+
+        # Recreate the Filam object from the stored data
+        Filam = VortexFilament.from_dict(data)
+
+        # Split the vortex filament at the selected point
+        Filam.split([0.9, 0.1], [selected_x, selected_y, 0], [angle_1, angle_2])
+
+        Filam_dict = Filam.to_dict()
+        return Filam.draw_vortex_family([-2, 2], [-2, 2]), Filam_dict
+
+    # If no valid action, return the same data and figure
+    return go.Figure(), data
+
+@app.callback(
+    Output('selected-point-output', 'children'),  # Display the clicked point
+    Input('vort', 'clickData')  # Capture click events on the graph
+)
+def display_selected_data(clickData):
+    if clickData is None:
+        return "Click on a point on the graph to select it."
+
+    # Extract the selected point's x and y coordinates from clickData
+    selected_x = clickData['points'][0]['x']
+    selected_y = clickData['points'][0]['y']
+    
+    # You can now use selected_x and selected_y for further processing
+    return f"Selected Point: x = {selected_x:.2f}, y = {selected_y:.2f}"
 
 
-@app.callback(Output('vort','figure'),
-              Input('x_point_intercept','value'),
-              Input('y_point_intercept','value'),
-              Input('VortexStrength','value'),
-              Input('VortexAngle','value'),
-              Input('draw-button','n_clicks')
-             )
-def updateVortex(x, y, Gamma, theta, n_clicks):
-    vec = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta)),0])
-    return VortexFilament(Gamma, [x,y,0],vec).draw_vortex_family([-2,2],[-2,2])
     
 
 ## ----------------------------------- ##
