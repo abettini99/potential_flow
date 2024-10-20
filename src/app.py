@@ -255,6 +255,7 @@ def updateRotatingCylinderFigure(Vinf, radius, Gamma):
 @app.callback(
     Output('vort', 'figure'),
     Output('filam-store', 'data'),  # Store the Filam object
+    Output('transform-store', 'data'),  # Store the transformation matrix
     Input('draw-button', 'n_clicks'),  # Trigger based on the draw button click
     Input('split-button', 'n_clicks'),  # Trigger based on the split button click
     State('x_point_intercept', 'value'),  # Capture the current values but do not trigger on change
@@ -268,19 +269,38 @@ def updateRotatingCylinderFigure(Vinf, radius, Gamma):
 )
 def handle_vortex_operations(draw_clicks, split_clicks, x, y, Gamma, theta, selected_point, angle_1, angle_2, data):
     # Determine if we are drawing a new vortex or splitting the existing one
+    roll_angle = -np.deg2rad(60)
+    pitch_angle = -np.deg2rad(20)
+    roll_angle2 = np.deg2rad(5)
+
+    roll_transform = np.array([[1,0,0],
+                               [0,np.cos(roll_angle),-np.sin(roll_angle)],
+                               [0,np.sin(roll_angle),np.cos(roll_angle)]])
+    pitch_transform = np.array([[np.cos(pitch_angle),0,np.sin(pitch_angle)],
+                                [0,1,0],
+                                [-np.sin(pitch_angle),0,np.cos(pitch_angle)]])
+
+    transform = np.dot(pitch_transform, roll_transform)
+
+    roll_transform2 = np.array([[1,0,0],[0,np.cos(roll_angle2),-np.sin(roll_angle2)],[0,np.sin(roll_angle2),np.cos(roll_angle2)]])
+    transform = np.dot(roll_transform2,transform)
+
+    transform_store = transform.tolist()
+    
+
     ctx = dash.callback_context
     if not ctx.triggered:
         # If nothing has triggered the callback yet, return empty figure and no change in data
-        return go.Figure(), data
+        return go.Figure(), data, transform_store
 
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
     if button_id == 'draw-button' and draw_clicks:
         # Drawing the vortex filament
-        vec = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta)), 0])
+        vec = np.array([np.sin(np.deg2rad(theta)), np.cos(np.deg2rad(theta)), 0])
         Filam = VortexFilament(Gamma, [x, y, 0], vec)
         Filam_dict = Filam.to_dict()
-        return Filam.draw_vortex_family([-2, 2], [-2, 2]), Filam_dict
+        return Filam.draw_vortex_family([-2.1, 2.1], [-2, 2], transform=transform), Filam_dict, transform_store
 
     elif button_id == 'split-button' and split_clicks:
         # Splitting the vortex filament
@@ -299,22 +319,33 @@ def handle_vortex_operations(draw_clicks, split_clicks, x, y, Gamma, theta, sele
         Filam.split([0.9, 0.1], [selected_x, selected_y, 0], [angle_1, angle_2])
 
         Filam_dict = Filam.to_dict()
-        return Filam.draw_vortex_family([-2, 2], [-2, 2]), Filam_dict
+        return Filam.draw_vortex_family([-2.1, 2.1], [-2, 2], transform=transform), Filam_dict, transform_store
 
     # If no valid action, return the same data and figure
-    return go.Figure(), data
+    return go.Figure(), data, transform_store
 
 @app.callback(
     Output('selected-point-output', 'children'),  # Display the clicked point
-    Input('vort', 'clickData')  # Capture click events on the graph
+    Input('vort', 'clickData'),  # Capture click events on the graph
+    Input('transform-store', 'data')
 )
-def display_selected_data(clickData):
+def display_selected_data(clickData, transform):
     if clickData is None:
         return "Click on a point on the graph to select it."
+
+    transform = np.array(transform)[:2,:2]
+    transform = np.linalg.inv(transform)
 
     # Extract the selected point's x and y coordinates from clickData
     selected_x = clickData['points'][0]['x']
     selected_y = clickData['points'][0]['y']
+
+
+    selected_point = np.array([selected_x, selected_y])
+
+    selected_point = np.dot(transform, selected_point)
+    selected_x = selected_point[0]
+    selected_y = selected_point[1]
     
     # You can now use selected_x and selected_y for further processing
     return f"Selected Point: x = {selected_x:.2f}, y = {selected_y:.2f}"
