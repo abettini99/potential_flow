@@ -34,6 +34,7 @@ from src.plots.plotSourceUniform import plotSourceUniform
 from src.plots.plotRankine import plotRankine
 from src.plots.plotCylinder import plotCylinder
 from src.plots.plotRotatingCylinder import plotRotatingCylinder
+from src.plots.plotTAT import plotFlappedAirfoil
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -239,6 +240,19 @@ def updateVortexFigure(Gamma):
              )
 def updateRotatingCylinderFigure(Vinf, radius, Gamma):
     return plotRotatingCylinder([-1,1], [-1,1], Vinf, radius, Gamma)
+
+## ----------------------------------- ##
+##     App callables for TAT page      ##
+## ----------------------------------- ##
+
+@app.callback(Output("flappedAirfoil", "figure"),
+              Input("flapAngle", "value"), 
+              Input("angleOfAttack", "value"),
+              Input("flapRatio", "value"),
+              Input("freestreamSpeed", "value")
+              )
+def updateFlappedAirfoil(flapAngle, angleOfAttack, flapRatio, freestreamSpeed):
+    return plotFlappedAirfoil(1, flapAngle, freestreamSpeed, flapRatio, angleOfAttack)
 
 ## ----------------------------------- ##
 ## App callables for panel method page ##
