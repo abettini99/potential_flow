@@ -51,24 +51,28 @@ def plotFlappedAirfoil(c, flap_angle, Vinf, flap_ratio, alpha):
         AFS = sine_fourier(A, theta_coordinates[k])
         delta_cp[k] = 4*((alpha + (flap_angle/np.pi)*(np.pi - theta_flap))*((1+np.cos(theta_coordinates[k]))/(np.sin(theta_coordinates[k]))) + AFS)
 
-    #Calculate airfoil coefficients
+    #Calculate airfoil coefficients and center of pressure
 
     cl = 2*np.pi*(A[0]+0.5*A[1])
     cm = (np.pi/4)*(A[2]-A[1])
     xcp = c*(0.25-(cm/cl))
     xcp_rotated = [np.cos(-alpha) * xcp - np.sin(-alpha) * 0]
     ycp_rotated = [np.sin(-alpha) * xcp + np.cos(-alpha) * 0]
+    alpha_zero_lift = (flap_angle/np.pi)*(-np.sin(theta_flap) - (np.pi - theta_flap))
 
-    coefficients_names = ["Cl", "Cm(c/4)"]
-    coefficient_values = [cl, cm]
+    #Calculate total airfoil lift and moment plots
+
+    alpha_list = np.linspace(-3, 15, 30)
+    cl_list = 2*np.pi*(alpha_list*((2*np.pi)/360) - alpha_zero_lift)
+    cm_list = np.ones(len(cl_list))*cm
 
     ## ========================== ##
     ## ADD INFORMATION TO FIGUREs ##
     ## ========================== ##
 
-    fig1 = make_subplots(rows=1, cols=3,
-                         subplot_titles=("Flapped Airfoil Camber Line", "Pressure Difference Distribution", "Airfoil Coefficients"), 
-                         horizontal_spacing=0.4
+    fig1 = make_subplots(rows=2, cols=2,
+                         subplot_titles=("Flapped Airfoil Camber Line", "Pressure Difference Distribution", "Lift Coefficient Plot", "Moment Coefficient Plot"), 
+                         horizontal_spacing=0.3
                         )
     
     #Add plots
@@ -99,15 +103,47 @@ def plotFlappedAirfoil(c, flap_angle, Vinf, flap_ratio, alpha):
                   '<extra></extra>',
                         ), row=1, col=2)
     
-    fig1.add_trace(go.Bar(
-                    x=coefficients_names,  # X-axis categories
-                    y=coefficient_values,      # Y-axis values
-                    name="Airfoil Coefficients",  # Trace name
-                    ), row=1, col=3
-)
+    fig1.add_trace(go.Scatter(
+                name="Lift Coefficient Plot",
+                x=alpha_list, y=cl_list,
+                mode='lines',  #Plot as a line
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=2, col=1)
+    
+    fig1.add_trace(go.Scatter(
+                name="Moment Coefficient Plot",
+                x=alpha_list, y=cm_list,
+                mode='lines',  #Plot as a line
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=2, col=2)
+    
+    fig1.add_trace(go.Scatter(
+                name="Current Lift Coefficient",
+                x=[alpha*((360)/(2*np.pi))], y=[cl],
+                mode="markers",  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=2, col=1)
+    
+    fig1.add_trace(go.Scatter(
+                name="Current Moment Coefficient",
+                x=[alpha*((360)/(2*np.pi))], y=[cm],
+                mode="markers",  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=2, col=2)
+
 
     #Update x-axis properties
     fig1.update_xaxes(#title_text='x',
+                      #range=[0, 1], 
+                      #row=1, col=1,
                       title_font_color='#000000',
                       title_standoff=0,
                       gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB
@@ -128,12 +164,12 @@ def plotFlappedAirfoil(c, flap_angle, Vinf, flap_ratio, alpha):
                       minor_tickwidth=2,
                       minor_griddash='dot',
                       hoverformat='.4f',
-                      range=[0, 1], 
-                      row=1, col=1
                      )
     
     #Update y-axis properties
     fig1.update_yaxes(#title_text='y',
+                      #range=[-1, 1], 
+                      #row=1, col=1,
                       title_font_color='#000000',
                       title_standoff=0,
                       gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB, 0.75 opacity
@@ -152,17 +188,23 @@ def plotFlappedAirfoil(c, flap_angle, Vinf, flap_ratio, alpha):
                       minor_ticks='outside',
                       minor_ticklen=5,
                       minor_tickwidth=2,
-                      minor_griddash='dot',
-                      range=[-1, 1], 
-                      row=1, col=1
+                      minor_griddash='dot'
                      )
     
     #Update figure layout
     fig1.update_layout(font_color='#000000',
                        plot_bgcolor='rgba(255,255,255,1)',
                        paper_bgcolor='rgba(255,255,255,1)',
-                       height=500,
-                       width=900,
                        showlegend=False,
                       )
+    
+    fig1.update_xaxes(
+    range=[0, 1],
+    row=1, col=1
+)
+
+    fig1.update_yaxes(
+        range=[-1, 1],
+        row=1, col=1
+    )
     return fig1

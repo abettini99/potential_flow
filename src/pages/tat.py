@@ -187,7 +187,7 @@ def tat():
     dbc.Row([
         dbc.Col([
             dcc.Graph(id="flappedAirfoil", mathjax=True),
-        ], width=6)
+        ], width=10)
     ], justify='center'),
     
     
