@@ -35,6 +35,8 @@ from src.plots.plotRankine import plotRankine
 from src.plots.plotCylinder import plotCylinder
 from src.plots.plotRotatingCylinder import plotRotatingCylinder
 from src.plots.plotTAT import plotFlappedAirfoil
+from src.plots.plotTAT import plotParabolicAirfoil
+from src.plots.plotTAT import plotCubicAirfoil
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -247,12 +249,26 @@ def updateRotatingCylinderFigure(Vinf, radius, Gamma):
 
 @app.callback(Output("flappedAirfoil", "figure"),
               Input("flapAngle", "value"), 
-              Input("angleOfAttack", "value"),
-              Input("flapRatio", "value"),
-              Input("freestreamSpeed", "value")
+              Input("angleOfAttack1", "value"),
+              Input("flapRatio", "value")
               )
-def updateFlappedAirfoil(flapAngle, angleOfAttack, flapRatio, freestreamSpeed):
-    return plotFlappedAirfoil(1, flapAngle, freestreamSpeed, flapRatio, angleOfAttack)
+def updateFlappedAirfoil(flapAngle, angleOfAttack1, flapRatio):
+    return plotFlappedAirfoil(1, flapAngle, 1, flapRatio, angleOfAttack1)
+
+@app.callback(Output("parabolicAirfoil", "figure"),
+              Input("angleOfAttack2", "value"),
+              Input("maxCamber", "value")
+              )
+def updateParabolicAirfoil(angleOfAttack2, maxCamber):
+    return plotParabolicAirfoil(1, maxCamber, 1, angleOfAttack2)
+
+@app.callback(Output("cubicAirfoil", "figure"),
+              Input("clOpt", "value"),
+              Input("cmAC", "value"),
+              Input("angleOfAttack3", "value")
+              )
+def updateCubicAirfoil(clOpt, cmAC, angleOfAttack3):
+    return plotCubicAirfoil(1, clOpt, cmAC, 1, angleOfAttack3)
 
 ## ----------------------------------- ##
 ## App callables for panel method page ##

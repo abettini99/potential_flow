@@ -14,10 +14,9 @@ def tat():
     concepts uisng the knowledge from the previous sections.
     
     """, mathjax=True),
-    html.Br(),
+    html.Hr(),
+    html.H2("Vortex-Sheet Airfoil and Kutta Condition."),
     dcc.Markdown(r"""
-                 
-    **1. Vortex-Sheet Airfoil and Kutta Condition.**
                  
     In previous chapters we have been able to combine certain elementary potential flows in such a way that the resulting streamlines resemble basic solid bodies, this means
     that there is **no normal flow component into the body** itself since the flow velocity is parallel to a streamline. This will be a condition we will have to 
@@ -54,10 +53,9 @@ def tat():
     For further information on these initial matters, consult sections 4.4 and 4.5 of the course book.
 
     """, mathjax=True),
-    html.Br(),
-    dcc.Markdown(r"""
-
-    **2. Thin Airfoil Theory Assumptions and Conditions.**     
+    html.Hr(),
+    html.H2("Thin Airfoil Theory Assumptions and Conditions."),
+    dcc.Markdown(r"""    
     
     It is generally not possible to find a solution to the vorticity distribution we created, hence some further simplications
     must be made. We will now consider thin airfoils ($$<6\% t/c$$), if we look at these from far away then they can be seen as if they were only the camber line due to this small thickness. Additionally,
@@ -76,10 +74,9 @@ def tat():
     F. The **angle of attack is small** ($$<15º$$) such that small-angle approximations are valid. 
 
     """, mathjax=True),
-    html.Br(),
+    html.Hr(),
+    html.H2("Symmetric Airfoil Results."),
     dcc.Markdown(r"""
-
-    **3. Symmetric Airfoil Results.** 
                  
     The results obtained for a symmetric airfoil, one with no camber, are as follows:
 
@@ -100,10 +97,9 @@ def tat():
     zero lift at zero angle of attack**. For details on the derivation of these results consult section 4.7 of the course book. 
                  
     """, mathjax=True),
-    html.Br(),
-    dcc.Markdown(r""" 
-
-    **4. Cambered Airfoil Results.**    
+    html.Hr(),
+    html.H2("Cambered Airfoil Results."),
+    dcc.Markdown(r"""    
 
     The result for a cambered airfoil is essentially the symmetric case plus a Fourier series term (an infinite trigonometric series). The key expressions
     are:
@@ -135,12 +131,29 @@ def tat():
     it **varies with lift coefficient** and hence, angle of attack. For details on the derivation of these results consult section 4.8 of the course book.           
 
     """, mathjax=True),
-    html.Br(),
+    html.Hr(),
+    html.H2("Airfoil Examples"),
     dcc.Markdown(r""" 
 
-    **5. Airfoil Examples**
                  
-    In this section you can modify parameters for certain airfoils and observe the changes in the results, all calculations are based on thin-airfoil theory results.                      
+    In this section you can modify parameters for certain airfoils and observe the changes in the results, all calculations are based on thin-airfoil theory results. 
+    Below, the center of pressure is indicated as a red dot in the camber line and the current lift and moment (about c/4) is indicated
+    as a dot in the respective plots.                     
+
+    **1. Flapped Airfoil**
+
+    This airfoil is essentially a flat plate with an angled section resembling a **flap**, it is based on the airfoil from Exercise 4.6. 
+    Its camber line is given below, where $$c$$ is the chord length, $$c_{f}$$ is the flap length on the x-axis and $$\delta$$ is the angle of the flap. 
+
+    $$
+    z(x) = 
+    \begin{cases} 
+    0 & \text{if } 0 \leq x \leq c\left(1-\frac{c_{f}}{c}\right) \\
+    -\delta x + \delta c\left(1-\frac{c_{f}}{c}\right)  & \text{if } c\left(1-\frac{c_{f}}{c}\right) < x \leq c
+    \end{cases}               
+    $$
+
+                 
 
     """, mathjax=True),
     
@@ -154,10 +167,11 @@ def tat():
                         15: {'label': "15"}}
               ),
     html.Label("Angle of attack Slider"),
-    dcc.Slider(0, 15,
+    dcc.Slider(-3, 15,
                value=0,
-               id="angleOfAttack",
-               marks={0: {'label': "0"},
+               id="angleOfAttack1",
+               marks={-3: {'label': "-3"},
+                        0: {"label": "0"},
                            5: {'label': "5"},
                         10: {'label': "10"}, 
                         15: {'label': "15"}}
@@ -173,16 +187,6 @@ def tat():
                         1: {'label': "1"}}
               ),
 
-    html.Label("Freestream Speed Slider"),
-    dcc.Slider(0, 30,
-               value=15,
-               id="freestreamSpeed",
-               marks={0: {'label': "0"},
-                           10: {'label': "10"},
-                        20: {'label': "20"}, 
-                        30: {'label': "30"}}
-              ),
-
     ## Graph updated via app.callable() in main.py
     dbc.Row([
         dbc.Col([
@@ -190,6 +194,104 @@ def tat():
         ], width=10)
     ], justify='center'),
     
+    dcc.Markdown(r"""                    
+
+    **2. Parabolic Airfoil**
+
+    In this case we have an airfoil described by a **parabola** like in Exercise 4.1. Its camber line is shown below where $$k$$ is the maximum camber at the
+    mid point of the airfoil. 
+
+    $$
+    z(x) = 4k\left(x - \frac{x^{2}}{c}\right)             
+    $$
+
+    """, mathjax=True),
     
-    
+    html.Label("Maximum Camber Slider"),
+    dcc.Slider(0, 0.3,
+               value=0.1,
+               id="maxCamber",
+               marks={0: {'label': "0"},
+                           0.1: {'label': "0.1"},
+                        0.2: {'label': "0.2"}, 
+                        0.3: {'label': "0.3"}}
+              ),
+    html.Label("Angle of attack Slider"),
+    dcc.Slider(-3, 15,
+               value=0,
+               id="angleOfAttack2",
+               marks={-3: {'label': "-3"},
+                         0: {"label": "0"},
+                           5: {'label': "5"},
+                        10: {'label': "10"}, 
+                        15: {'label': "15"}}
+              ),
+
+    ## Graph updated via app.callable() in main.py
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="parabolicAirfoil", mathjax=True),
+        ], width=10)
+    ], justify='center'),
+
+        dcc.Markdown(r"""                    
+
+    **2. Cubic Airfoil**
+
+    In this case we have an airfoil described by a **cubic polynomial** like in Exercise 4.1. Its camber line is shown below where $$k$$ is the maximum camber at the
+    mid point of the airfoil. 
+
+    $$
+    z(x) = 4k\left(x - \frac{x^{2}}{c}\right)             
+    $$
+
+    """, mathjax=True),
+
+    html.Label("Optimal Lift Coefficient Slider"),
+    dcc.Slider(-2, 2,
+               value=0.5,
+               id="clOpt",
+               marks={-2: {'label': "-2"},
+                        -1.5: {'label': "-1.5"},
+                        -1: {'label': "-1"}, 
+                        -0.5: {'label': "-0.5"},
+                        0: {'label': "0"},
+                        0.5: {'label': "0.5"}, 
+                        1: {'label': "1"},
+                        1.5: {'label': "1.5"},
+                        2: {'label': "2"}}
+              ),
+    html.Label("Aerodynamic Center Moment Coefficient Slider"),
+    dcc.Slider(-2, 2,
+               value=0,
+               id="cmAC",
+               marks={-2: {'label': "-2"},
+                        -1.5: {'label': "-1.5"},
+                        -1: {'label': "-1"}, 
+                        -0.5: {'label': "-0.5"},
+                        0: {'label': "0"},
+                        0.5: {'label': "0.5"}, 
+                        1: {'label': "1"},
+                        1.5: {'label': "1.5"},
+                        2: {'label': "2"}}
+              ),
+
+    html.Label("Angle of Attack Slider"),
+    dcc.Slider(-3, 15,
+               value=0,
+               id="angleOfAttack3",
+               marks={-3: {'label': "-3"},
+                         0: {"label": "0"},
+                           5: {'label': "5"},
+                        10: {'label': "10"}, 
+                        15: {'label': "15"}}
+              ),          
+
+    ## Graph updated via app.callable() in main.py
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="cubicAirfoil", mathjax=True),
+        ], width=10)
+    ], justify='center'),
+
     ])
