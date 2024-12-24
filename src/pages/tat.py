@@ -236,14 +236,25 @@ def tat():
 
         dcc.Markdown(r"""                    
 
-    **2. Cubic Airfoil**
+    **3. Cubic Airfoil**
 
-    In this case we have an airfoil described by a **cubic polynomial** like in Exercise 4.1. Its camber line is shown below where $$k$$ is the maximum camber at the
-    mid point of the airfoil. 
+    In this case we have an airfoil described by a **cubic polynomial** like in Exercise 4.4 and 4.5. Its camber line is shown below where all $$k_{i}$$ are constants.
 
     $$
-    z(x) = 4k\left(x - \frac{x^{2}}{c}\right)             
+    z(x) = k_{1}x - k_{2}\frac{x^{2}}{c} + k_{3}\frac{x^{3}}{c^{2}}            
     $$
+
+    However, in this case the camber line is a bit more complicated and does not always satisfy the boundary conditions we usually apply to the camber lines of $$z(0)=z(c)=0$$. Hence, 
+    we modify our approach to be that of **design rather than analysis**, such that we provide performance parameters like lift coefficient or moment coefficient and calculate the camber
+    line to achieve this. This is in contrast to the previous examples where we modified the camber line and observed the results. 
+                     
+    The camber line in question is designed in such a way that we provide the **optimal lift coefficient**, the one which occurs at the angle of attack at which the flow
+    is smoothly attached to the leading edge as well, and the **aerodynamic center moment coefficient**, which then allows us to calculate the first three coefficients of the Fourier terms
+    since the rest are free to be chosen and hence made zero. This is the approach used in the lecture slides and additional course material to obtain a camber line for neutral stability. 
+
+    The optimal lift coefficient is called as such because when the flow is attached at the leading edge, we obtain low circulation in that area, which in reality turns out to
+    prevent flow separation or the transition of the boundary layer to a turbulent mode (because the airflow is more laminar). Hence, it is the lift coefficient for **minimum drag**. Note that in the
+    following plots, the airfoil can appear to warp when changing the angle of attack, this is only due to the scaling of the axes and it does not change geometrically.   
 
     """, mathjax=True),
 
@@ -294,4 +305,90 @@ def tat():
         ], width=10)
     ], justify='center'),
 
+        dcc.Markdown(r"""                    
+
+    **4. NACA 4-Series Airfoil**
+
+    Finally, we can take a look more sophisticated airfoils to verify the accuracy of thin-airfoil theory by comparing its results with software like X-FOIL, which accounts for thickness. We will use the 4-digit series of the NACA airfoils. 
+    The camber line (normalized for a chord of 1) for these is defined as given below, where $$P/10$$ is the location of the maximum camber on the chord and $$M/100$$ is the
+    maximum camber, so the 4-digit code reads as MPTT where TT is the thickness to chord ratio (neglected in this analysis).
+
+     $$
+    z(x) = 
+    \begin{cases} 
+    \frac{M}{P^{2}}(2Px - x^{2}) & \text{if } 0 \leq x \leq P \\
+    \frac{M}{(1-P)^{2}}(1-2P+2Px-x^{2})  & \text{if } P < x \leq 1
+    \end{cases}               
+    $$                 
+
+    """, mathjax=True),
+
+    html.Label("Maximum Camber Slider"),
+    dcc.Slider(0.01, 0.09,
+               value=0.02,
+               id="maxCamber2",
+               marks={0.01: {'label': "0.01"},
+                        0.02: {'label': "0.02"},
+                        0.03: {'label': "0.03"}, 
+                        0.04: {'label': "0.04"},
+                        0.05: {'label': "0.05"},
+                        0.06: {'label': "0.06"}, 
+                        0.07: {'label': "0.07"},
+                        0.08: {'label': "0.08"},
+                        0.09: {'label': "0.09"}}
+              ),
+    html.Label("Maximum Camber Position Slider"),
+    dcc.Slider(0.1, 0.9,
+               value=0.4,
+               id="maxCamberPosition",
+               marks={0.1: {'label': "0.1"},
+                        0.2: {'label': "0.2"},
+                        0.3: {'label': "0.3"}, 
+                        0.4: {'label': "0.4"},
+                        0.5: {'label': "0.5"},
+                        0.6: {'label': "0.6"}, 
+                        0.7: {'label': "0.7"},
+                        0.8: {'label': "0.8"},
+                        0.9: {'label': "0.9"}}
+              ),
+
+    html.Label("Angle of Attack Slider"),
+    dcc.Slider(-3, 15,
+               value=0,
+               id="angleOfAttack4",
+               marks={-3: {'label': "-3"},
+                         0: {"label": "0"},
+                           5: {'label': "5"},
+                        10: {'label': "10"}, 
+                        15: {'label': "15"}}
+              ),          
+
+    ## Graph updated via app.callable() in main.py
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="NACA4Airfoil", mathjax=True),
+        ], width=10)
+    ], justify='center'),
+
+    dcc.Markdown(r"""                    
+
+    We will test the NACA 2404 and 2412 airfoils, both with thin-airfoil theory and X-FOil, the results are summarized below. It can be seen for the thinner version
+    the $$c_{l}$$ is quite close while the $$c_{m}$$ is also close but not so much. Even for 3 times the thickness, the results are still close, while the $$c_{m}$$ continues
+    to deviate as it is clearly not constant when accounting for thickness.      
+
+    """, mathjax=True),
+
+    dcc.Markdown('''
+    |                          |       |   **Thin-Airfoil Theory**    |         **X-FOIL**         |
+    |--------------------------|-------|-----------------------------------------------------------|
+    |                          | AoA   | CL         | CM              | CL               | CM      |
+    |                          |       |            |                 |                  |         |
+    | **NACA 2404**            | α=0º  | 0.2457     | -0.0465         | 0.2363           | -0.0537 |
+    |                          | α=5º  | 0.794      | -0.0465         | 0.8034           | -0.0562 |
+    |                          | α=12º | 1.5616     | -0.0465         | N/A              | N/A     |
+    |                          |       |            |                 |                  |         |
+    | **NACA 2412**            | α=0º  | 0.2457     | -0.0465         | 0.256            | -0.0593 |
+    |                          | α=5º  | 0.794      | -0.0465         | 0.8589           | -0.0634 |
+    |                          | α=12º | 1.5616     | -0.0465         | 1.69             | -0.074  |
+    ''')
     ])
