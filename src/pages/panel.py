@@ -561,7 +561,98 @@ def panel():
 
     dcc.Markdown(r"""                    
 
-    Hi      
+    **1. Velocity Component Equations**
+
+    The vortex panel method works, but it is not as good as we would like since for some airfoils it does not provide a good solution and it can be highly dependent on the panels' sizes and positions. The final method we will
+    consider here is a combination of the previous two, we will have source panels of constant strength but varying between panels and vortex panels of constant strength but not varying between panels, so we will have a single value
+    for the vortex panel strength. The total normal and tangential velocity expressions at a panel's control point is simply the sum of all the previously derived expressions:
+
+    $$
+    V_{n, i} (x_{i}, y_{i}) = V_{\infty} cos(\beta_{i}) + \frac{\lambda_{i}}{2} - \sum^{n}_{j=1} \frac{\gamma}{2 \pi} \int_{j} \frac{\partial \theta_{Pj}}{\partial n_{i}} ds_{j} + \sum_{j=1, j \neq i}^n \frac{\lambda_{j}}{2 \pi} \int_j \frac{\partial}{\partial n_{i}}[ln(r_{ij})] \, ds_{j} = 0
+    $$   
+    $$
+    V_{t, i} (x_{i}, y_{i}) = V_{\infty} sin(\beta_{i}) + \frac{\gamma}{2} - \sum^{n}_{j=1, j \neq i} \frac{\gamma}{2 \pi} \int_{j} \frac{\partial \theta_{Pj}}{\partial t_{i}} ds_{j} + \sum_{j=1}^n \frac{\lambda_{j}}{2 \pi} \int_j \frac{\partial}{\partial t_{i}}[ln(r_{ij})] \, ds_{j}            
+    $$
+      
+
+    **2. System of Equations and Lift Calculation**
+
+    We do not need to calculate any geometric integrals since they are the same as before, hence we can directly move to creating the system of equations. Considering as an example a 3 panel body, we have:
+    
+    $$
+    V_{n, 1} = V_{\infty} cos(\beta_{1}) + \frac{\lambda_{1}}{2} + \frac{\lambda_{2} I_{12}}{2 \pi} + \frac{\lambda_{3} I_{13}}{2 \pi} - \frac{\gamma (K_{12} + K_{13})}{2 \pi} = 0           
+    $$
+    $$
+    V_{n, 2} = V_{\infty} cos(\beta_{2}) + \frac{\lambda_{2}}{2} + \frac{\lambda_{1} I_{21}}{2 \pi} + \frac{\lambda_{3} I_{23}}{2 \pi} - \frac{\gamma (K_{21} + K_{23})}{2 \pi} = 0                       
+    $$
+    $$
+    V_{n, 3} = V_{\infty} cos(\beta_{3}) + \frac{\lambda_{3}}{2} + \frac{\lambda_{1} I_{31}}{2 \pi} + \frac{\lambda_{2} I_{32}}{2 \pi} - \frac{\gamma (K_{31} + K_{32})}{2 \pi} = 0                        
+    $$
+                 
+    In this case, we have 4 unknowns and 3 equations meaning it is an underdetermined system. We can obtain the final equation from the Kutta condition, although this time it is a bit more involved since we cannot apply the same condition as we did for the vortex
+    panel method because in this case all the vortex strengths are equal. Instead we set the first and last panels' tangential velocities equal to each other, but since the positive direction is the panel's tangential vector which goes in the clock-wise sense around the body, this means that the condition is:
+                 
+    $$
+    V_{t, N} + V_{t, 1} = 0             
+    $$
+    $$
+    V_{t, 1} = V_{\infty} sin(\beta_{1}) + \sum^{N}_{j=2} \frac{\lambda_{j} J_{ij}}{2 \pi} + \frac{\gamma_{1}}{2} - \sum^{N}_{j=2} \frac{\gamma L_{ij}}{2 \pi}
+    $$
+    $$
+    V_{t, N} = V_{\infty} sin(\beta_{N}) + \sum^{N-1}_{j=1} \frac{\lambda_{j} J_{ij}}{2 \pi} + \frac{\gamma_{N}}{2} - \sum^{N-1}_{j=1} \frac{\gamma L_{ij}}{2 \pi}             
+    $$
+                     
+    Now, we will try to isolate the unknown source and vortex strengths to be able to add it into the system of equations.
+                 
+    $$
+    V_{\infty} sin(\beta_{1}) + \sum^{N}_{j=2} \frac{\lambda_{j} J_{ij}}{2 \pi} + \frac{\gamma_{1}}{2} - \sum^{N}_{j=2} \frac{\gamma L_{ij}}{2 \pi} + V_{\infty} sin(\beta_{N}) + \sum^{N-1}_{j=1} \frac{\lambda_{j} J_{ij}}{2 \pi} + \frac{\gamma_{N}}{2} - \sum^{N-1}_{j=1} \frac{\gamma L_{ij}}{2 \pi} = 0          
+    $$
+    $$
+    \sum^{N}_{j=2} \lambda_{j} J_{ij} - \sum^{N}_{j=2} \gamma L_{ij} + \sum^{N-1}_{j=1} \lambda_{j} J_{ij} - \sum^{N-1}_{j=1} \gamma L_{ij} + 2 \pi \gamma = -2 \pi V_{\infty} (sin(\beta_{1}) + V_{\infty} sin(\beta_{N}))            
+    $$
+                 
+    For the 3 panel body, this expression is:
+                 
+    $$
+    \lambda_{2} J_{12} + \lambda_{3} J_{13} + \lambda_{1} J_{31} + \lambda_{2} J_{32} - \gamma L_{12} - \gamma L_{13} - \gamma L_{31} - \gamma L_{32} 2 \pi \gamma = -2 \pi V_{\infty} (sin(\beta_{1}) + sin(\beta_{N}))             
+    $$
+
+    If we now multiply the previous system of equations also by $$2 \pi$$ and add the Kutta condition, then we have our final system of equations in matrix form:
+    
+    $$
+    
+        \begin{bmatrix}
+        \pi & I_{12} & I_{13} & -(K_{12} + K_{13}) \\
+        I_{21} & \pi & I_{23} & -(K_{21} + K_{23}) \\
+        I_{31} & I_{32} & \pi $ -(K_{31} + K_{32}) \\
+        J_{31} & (J_{12} + J_{32}) & J_{13} & -(L_{12} + L_{13} + L_{31} + L_{32}) + 2 \pi
+        \end{bmatrix}
+        \begin{bmatrix}
+        \lambda_{1} \\
+        \lambda_{2} \\
+        \lambda_{3} \\
+        \gamma
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+        -V_{\infty} 2 \pi cos(\beta_{1}) \\
+        -V_{\infty} 2 \pi cos(\beta_{2}) \\
+        -V_{\infty} 2 \pi cos(\beta_{3}) \\
+        -V_{\infty} 2 \pi (sin(\beta_{1}) + sin(\beta_{3}))
+        \end{bmatrix}
+                     
+    $$
+
+    After this, the tangential velocity components can also be calculated, followed by the pressure coefficients and the lift with:
+
+    $$
+    C_{p, i} = 1 - \left(\frac{V_{i}}{V_{\infty}} \right)^{2}
+    $$           
+    $$
+    L' = \rho_{\infty} V_{\infty} \sum^{n}_{j=1} \gamma S_{j}            
+    $$
+
+    **3. Airfoil Example**           
 
     """, mathjax=True)
 
