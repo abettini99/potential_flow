@@ -38,6 +38,7 @@ from src.plots.plotTAT import plotFlappedAirfoil
 from src.plots.plotTAT import plotParabolicAirfoil
 from src.plots.plotTAT import plotCubicAirfoil
 from src.plots.plotTAT import plotNACA4Airfoil
+from src.plots.plotPanel import plotSourceCylinder
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -282,6 +283,15 @@ def updateNACA4Airfoil(maxCamber2, maxCamberPosition, angleOfAttack4):
 ## ----------------------------------- ##
 ## App callables for panel method page ##
 ## ----------------------------------- ##
+
+@app.callback(Output("SourceCylinder", "figure"),
+              Input("numPanel", "value"),
+              Input("velocity", "value"),
+              Input("angleOfAttack10", "value"))
+
+def updateSourceCylinder(numPanel, velocity, angleOfAttack10):
+    return plotSourceCylinder(angleOfAttack10, numPanel, velocity)
+
 
 ## =================== ##
 ## Main code execution ##

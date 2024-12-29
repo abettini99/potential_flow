@@ -337,15 +337,108 @@ def panel():
     much more efficiently and faster than full matrices. This is one of the drawbacks of this method.
 
     **4. Cylinder Example. **
+                     
+    In this example you can modify parameters for the case of a cylinder. If you are implementing the method yourself, you can verify the different point coordinates and below the matrix equations
+    for the 8 panel cylinder is given as well for this purpose. In the plots, you can see the analytical solution for the non-lifing flow around a cylinder and the computed values of the pressure coefficient at the panels' control points. 
+    The remaining plots show the pressure and velocity field around the cylinder including the streamlines, to be able to calculate these kinds of plots you need to calculate the x and y components of the velocity field at each point. 
+    This is done much in the same way as with the normal and tangential velocity components, it is the sum of the freestream and the induced velocity but the partial derivatives are taken with respect to the x and y directions.  
 
+    $$
+    
+        \begin{bmatrix}
+        3.1415 & 0.3528 & 0.4017 & 0.4073 & 0.4084 & 0.4073 & 0.4017 & 0.3528 \\
+        0.3528 & 3.1415 & 0.3528 & 0.4017 & 0.4073 & 0.4084 & 0.4073 & 0.4017 \\
+        0.4017 & 0.3528 & 3.1415 & 0.3528 & 0.4017 & 0.4073 & 0.4084 & 0.4073 \\
+        0.4073 & 0.4017 & 0.3528 & 3.1415 & 0.3528 & 0.4017 & 0.4073 & 0.4084 \\
+        0.4084 & 0.4073 & 0.4017 & 0.3528 & 3.1415 & 0.3528 & 0.4017 & 0.4073 \\
+        0.4073 & 0.4084 & 0.4073 & 0.4017 & 0.3528 & 3.1415 & 0.3528 & 0.4017 \\
+        0.4017 & 0.4073 & 0.4084 & 0.4073 & 0.4017 & 0.3528 & 3.1415 & 0.3528 \\
+        0.3528 & 0.4017 & 0.4073 & 0.4084 & 0.4073 & 0.4017 & 0.3528 & 3.1415 
+        \end{bmatrix}
+        \begin{bmatrix}
+        \lambda_{1} \\
+        \lambda_{2} \\
+        \lambda_{3} \\
+        \lambda_{4} \\
+        \lambda_{5} \\
+        \lambda_{6} \\
+        \lambda_{7} \\
+        \lambda_{8} 
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+        -6.2831 \\
+        -4.4428 \\
+        0 \\
+        4.4428 \\
+        6.2831 \\
+        4.4428 \\
+        0 \\
+        -4.4428
+        \end{bmatrix}
+                     
+    $$
 
-                     """, mathjax=True),
+    """, mathjax=True),
 
+    html.Label("Number of Panels Slider"),
+    dcc.Slider(6, 16,
+               value=8,
+               id="numPanel",
+               marks={6: {'label': "6"},
+                        8: {'label': "8"},
+                        10: {'label': "10"}, 
+                        12: {'label': "12"},
+                        14: {'label': "14"},
+                        16: {'label': "16"}}
+              ),
+    html.Label("Freestream Velocity Slider"),
+    dcc.Slider(10, 100,
+               value=10,
+               id="velocity",
+               marks={10: {'label': "10"},
+                        20: {'label': "20"},
+                        30: {'label': "30"}, 
+                        40: {'label': "40"},
+                        50: {'label': "50"},
+                        60: {'label': "60"}, 
+                        70: {'label': "70"},
+                        80: {'label': "80"},
+                        90: {'label': "90"},
+                        100: {"label": "100"}}
+              ),
+
+    html.Label("Angle of Attack Slider"),
+    dcc.Slider(-90, 90,
+               value=0,
+               id="angleOfAttack10",
+               marks={-90: {'label': "-90"},
+                         -45: {"label": "-45"},
+                           0: {'label': "0"},
+                        45: {'label': "45"}, 
+                        90: {'label': "90"}}
+              ),          
+
+    ## Graph updated via app.callable() in main.py
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="SourceCylinder", mathjax=True),
+        ], width=10)
+    ], justify='center'),
+                     
+    dcc.Markdown(r"""
+
+    **5. Airfoil Example**
+                 
+    Lastly, an example with various airfoil types is shown. You may observe that the pressure coefficient distribution is symmetrical on either side of the airfoil, meaning that no lift is generated. This is
+    inline with the theory itself, since sources do not produce circulation and as such, there is no lift generated. 
+
+                 """, mathjax=True),
     html.Hr(),
     html.H2("Vortex Panel Method"),
 
     dcc.Markdown(r"""
-    
+                 
     **1. Velocity Component Equations**
                  
     The previous panel method is a bit useless, potential theory cannot model drag and the source panel method can't even calculate lift. Using vortex panel seems like a better option, in this case **lift will be created**, since
