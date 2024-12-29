@@ -5,6 +5,8 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
+np.seterr(under='ignore')
+
 #Source panel implementation originally from https://github.com/jte0419/Panel_Methods
 #Modified by Valter Somlai for the app's purposes
 
@@ -91,6 +93,63 @@ def COMPUTE_IJ_SPM(XC,YC,XB,YB,phi,S):
                 J[i,j] = 0                                                          # Set J value equal to zero
     
     return I, J                                                                     # Return both I and J matrices
+
+def airfoil_storage(name):
+
+    if name == "NACA2412":
+
+        XB = np.array([1.0, 0.999113, 0.997715, 0.996224, 0.994629, 0.992914, 
+                    0.99106, 0.989044, 0.986835, 0.984396, 0.981674, 0.978601, 
+                    0.975079, 0.970967, 0.966051, 0.959991, 0.952218, 0.941738, 
+                    0.926869, 0.90556, 0.877712, 0.846199, 0.813468, 0.780424, 
+                    0.747319, 0.714241, 0.681235, 0.648344, 0.615605, 0.583057, 
+                    0.550741, 0.518694, 0.486954, 0.455537, 0.424384, 0.393119, 
+                    0.361443, 0.330132, 0.299533, 0.269805, 0.241084, 0.213532, 
+                    0.187354, 0.162829, 0.140322, 0.120247, 0.102934, 0.088452, 
+                    0.076562, 0.066841, 0.058838, 0.052165, 0.046518, 0.041671, 
+                    0.037456, 0.033748, 0.030454, 0.027501, 0.024835, 0.022413, 
+                    0.020201, 0.018172, 0.016305, 0.014582, 0.012988, 0.011513, 
+                    0.010146, 0.00888, 0.00771, 0.00663, 0.005637, 0.004729, 0.003904, 
+                    0.003161, 0.002499, 0.001917, 0.001416, 0.000994, 0.000651, 0.000383, 
+                    0.000189, 6.5e-05, 6e-06, 8e-06, 7e-05, 0.000195, 0.000386, 0.000645, 
+                    0.000974, 0.001373, 0.001844, 0.002388, 0.003007, 0.003701, 0.004473, 
+                    0.005326, 0.006262, 0.007286, 0.008404, 0.009622, 0.010948, 0.012392, 
+                    0.013965, 0.015683, 0.017563, 0.019628, 0.021903, 0.024424, 0.027232, 
+                    0.030382, 0.033942, 0.038001, 0.042674, 0.048109, 0.054498, 0.062073, 
+                    0.071105, 0.081858, 0.094531, 0.109172, 0.125663, 0.143767, 0.163217, 
+                    0.183778, 0.205265, 0.227538, 0.250488, 0.274033, 0.298105, 0.322654, 
+                    0.347649, 0.373106, 0.399196, 0.426283, 0.454038, 0.482187, 0.510624, 
+                    0.539295, 0.568165, 0.597203, 0.626382, 0.655673, 0.68505, 0.714488, 
+                    0.743959, 0.773436, 0.802873, 0.832171, 0.861019, 0.888454, 0.912379, 
+                    0.930851, 0.944156, 0.953824, 0.961145, 0.966927, 0.971658, 0.975638, 
+                    0.97906, 0.982053, 0.98471, 0.987094, 0.989255, 0.99123, 0.993047, 0.994729, 
+                    0.996294, 0.997757, 0.999129, 1.0])
+
+        YB = np.array([-0.00126, -0.001325, -0.001428, -0.001538, -0.001655, -0.00178, -0.001916, 
+                    -0.002063, -0.002224, -0.002402, -0.002599, -0.002822, -0.003077, -0.003373, 
+                    -0.003726, -0.00416, -0.004714, -0.005456, -0.0065, -0.007982, -0.009895, -0.012032, 
+                    -0.014225, -0.016414, -0.018583, -0.020726, -0.022834, -0.0249, -0.026914, -0.028863, 
+                    -0.030732, -0.032506, -0.034165, -0.035691, -0.037067, -0.038285, -0.039414, -0.040428, 
+                    -0.041279, -0.041923, -0.042321, -0.042436, -0.042237, -0.041705, -0.040845, -0.039699, 
+                    -0.038346, -0.03689, -0.035417, -0.033984, -0.032615, -0.031316, -0.030084, -0.02891, -0.027787, 
+                    -0.026708, -0.025665, -0.024651, -0.023662, -0.022692, -0.021738, -0.020796, -0.019862, -0.018933, 
+                    -0.018007, -0.017081, -0.016153, -0.015221, -0.014283, -0.013337, -0.012383, -0.011418, -0.010444, 
+                    -0.009459, -0.008465, -0.007463, -0.006455, -0.005443, -0.00443, -0.003421, -0.002418, -0.001425, 
+                    -0.00045, 0.000514, 0.001493, 0.002495, 0.003511, 0.004541, 0.005582, 0.006633, 0.007694, 0.008762, 
+                    0.009838, 0.010923, 0.012016, 0.01312, 0.014236, 0.015366, 0.016512, 0.017678, 
+                        0.018866, 0.020081, 0.021327, 0.02261, 0.023934, 0.025308, 0.026739, 0.028238, 0.029816, 
+                        0.031487, 0.033267, 0.035178, 0.037242, 0.039488, 0.041945, 0.044643, 0.047598, 0.050804, 
+                        0.054214, 0.057733, 0.061233, 0.06459, 0.0677, 0.070494, 0.072929, 0.074979, 0.07663, 0.077878, 
+                        0.078719, 0.079155, 0.079191, 0.078827, 0.07806, 0.07691, 0.075436, 0.073654, 0.071578, 0.06922, 
+                        0.066591, 0.063702, 0.060562, 0.05718, 0.053564, 0.04972, 0.045657, 0.041379, 0.036895, 0.032222, 
+                        0.027415, 0.02265, 0.01834, 0.01491, 0.012384, 0.010519, 0.009091, 0.007952, 0.007013, 0.006219, 0.005532, 
+                        0.004929, 0.004392, 0.003908, 0.003468, 0.003064, 0.002692, 0.002347, 0.002025, 0.001724, 0.00144, 0.00126])
+        
+    else:
+        XB = 0
+        YB = 0
+    return XB, YB
+
 
 def plotSourceCylinder(alpha, panels, V):
     # User-defined knowns
@@ -442,4 +501,325 @@ def plotSourceCylinder(alpha, panels, V):
                        showlegend=False,
                       )
 
+    return fig1
+
+def plotSourceAirfoil(alpha, V, name):
+
+    # %% KNOWNS
+
+    # User-defined knowns
+    Vinf = V                                                                        # Freestream velocity []
+    AoA  = alpha                                                                        # Angle of attack [deg]
+    name = name                                                                   # NACA airfoil to load [####]
+
+    # Convert angle of attack to radians
+    AoAR   = AoA*(np.pi/180)                                                        # Angle of attack [rad]
+
+    #Load airfoil points from storage
+    XB, YB = airfoil_storage(name)
+
+    # Number of boundary points and panels
+    numPts = len(XB)                                                                # Number of boundary points
+    numPan = numPts - 1                                                             # Number of panels (control points)
+
+    # %% CHECK PANEL DIRECTIONS - FLIP IF NECESSARY
+
+    # Check for direction of points
+    edge = np.zeros(numPan)                                                         # Initialize edge value array
+    for i in range(numPan):                                                         # Loop over all panels
+        edge[i] = (XB[i+1]-XB[i])*(YB[i+1]+YB[i])                                   # Compute edge values
+
+    sumEdge = np.sum(edge)                                                          # Sum all edge values
+
+    # If panels are CCW, flip them (don't if CW)
+    if (sumEdge < 0):                                                               # If panels are CCW
+        XB = np.flipud(XB)                                                          # Flip the X-data array
+        YB = np.flipud(YB)                                                          # Flip the Y-data array
+
+    # %% PANEL METHOD GEOMETRY - REF [1]
+        
+    # Initialize variables
+    XC  = np.zeros(numPan)                                                          # Initialize control point X-coordinate
+    YC  = np.zeros(numPan)                                                          # Initialize control point Y-coordinate
+    S   = np.zeros(numPan)                                                          # Initialize panel length array
+    phi = np.zeros(numPan)                                                          # Initialize panel orientation angle array [deg]
+
+    # Find geometric quantities of the airfoil
+    for i in range(numPan):                                                         # Loop over all panels
+        XC[i]   = 0.5*(XB[i]+XB[i+1])                                               # X-value of control point
+        YC[i]   = 0.5*(YB[i]+YB[i+1])                                               # Y-value of control point
+        dx      = XB[i+1]-XB[i]                                                     # Change in X between boundary points
+        dy      = YB[i+1]-YB[i]                                                     # Change in Y between boundary points
+        S[i]    = (dx**2 + dy**2)**0.5                                              # Length of the panel
+        phi[i]  = math.atan2(dy,dx)                                                 # Angle of panel (positive X-axis to inside face)
+        if (phi[i] < 0):                                                            # Make all panel angles positive [rad]
+            phi[i] = phi[i] + 2*np.pi
+
+    # Compute angle of panel normal w.r.t. horizontal and include AoA
+    delta                = phi + (np.pi/2)                                          # Angle of panel normal [rad]
+    beta                 = delta - AoAR                                             # Angle of panel normal and AoA [rad]
+    beta[beta > 2*np.pi] = beta[beta > 2*np.pi] - 2*np.pi                           # Make all panel angles between 0 and 2pi [rad]
+
+    # %% COMPUTE SOURCE PANEL STRENGTHS - REF [5]
+
+    # Geometric integral (normal [I] and tangential [J])
+    # - Refs [2] and [3]
+    I, J = COMPUTE_IJ_SPM(XC,YC,XB,YB,phi,S)                                        # Compute geometric integrals
+
+    # Populate A matrix
+    # - Simpler option: A = I + np.pi*np.eye(numPan,numPan)
+    A = np.zeros([numPan,numPan])                                                   # Initialize the A matrix
+    for i in range(numPan):                                                         # Loop over all i panels
+        for j in range(numPan):                                                     # Loop over all j panels
+            if (i == j):                                                            # If the panels are the same
+                A[i,j] = np.pi                                                      # Set A equal to pi
+            else:                                                                   # If panels are not the same
+                A[i,j] = I[i,j]                                                     # Set A equal to geometric integral
+
+    # Populate b array
+    # - Simpler option: b = -Vinf*2*np.pi*np.cos(beta)
+    b = np.zeros(numPan)                                                            # Initialize the b array
+    for i in range(numPan):                                                         # Loop over all panels
+        b[i] = -Vinf*2*np.pi*np.cos(beta[i])                                        # Compute RHS array
+
+    # Compute source panel strengths (lam) from system of equations
+    lam = np.linalg.solve(A,b)                                                      # Compute all source strength values
+
+    # %% COMPUTE PANEL VELOCITIES AND PRESSURE COEFFICIENTS
+
+    # Compute velocities
+    # - Simpler method: Vt = Vinf*np.sin(beta) + np.dot(J,lam)/(2*np.pi)
+    #                   Cp = 1 - (Vt/Vinf)**2
+    Vt = np.zeros(numPan)                                                           # Initialize tangential velocity array
+    Cp = np.zeros(numPan)                                                           # Initialize pressure coefficient array
+    for i in range(numPan):                                                         # Loop over all i panels
+        addVal = 0                                                                  # Reset the summation value to zero
+        for j in range(numPan):                                                     # Loop over all j panels
+            addVal = addVal + (lam[j]/(2*np.pi))*J[i,j]                             # Sum all tangential source panel terms
+        
+        Vt[i] = Vinf*np.sin(beta[i]) + addVal                                       # Compute tangential velocity by adding uniform flow term
+        Cp[i] = 1 - (Vt[i]/Vinf)**2                                                 # Compute pressure coefficient
+
+    # %% COMPUTE STREAMLINES
+
+    # Grid parameters
+    nGridX   = 100                                                              # X-grid for streamlines and contours
+    nGridY   = 100                                                              # Y-grid for streamlines and contours
+    xVals    = [-0.5, 1.5]                                                      # X-grid extents [min, max]
+    yVals    = [-0.5, 0.5]                                                      # Y-grid extents [min, max]
+        
+    # Generate the grid points
+    Xgrid  = np.linspace(xVals[0],xVals[1],nGridX)                              # X-values in evenly spaced grid
+    Ygrid  = np.linspace(yVals[0],yVals[1],nGridY)                              # Y-values in evenly spaced grid
+    XX, YY = np.meshgrid(Xgrid, Ygrid)                                          # Create meshgrid from X and Y grid arrays
+        
+    # Initialize velocities
+    Vx     = np.zeros([nGridX,nGridY])                                          # Initialize X velocity matrix
+    Vy     = np.zeros([nGridX,nGridY])                                          # Initialize Y velocity matrix
+        
+    # Path to figure out if grid point is inside polygon or not
+    AF     = np.vstack((XB.T,YB.T)).T                                           # Concatenate XB and YB geometry points
+    afPath = path.Path(AF)                                                      # Create a path for the geometry
+        
+    # Solve for grid point X and Y velocities
+    for m in range(nGridX):                                                     # Loop over X grid points
+        for n in range(nGridY):                                                 # Loop over Y grid points
+            XP     = XX[m,n]                                                    # Current iteration's X grid point
+            YP     = YY[m,n]                                                    # Current iteration's Y grid point
+            Mx, My = STREAMLINE_SPM(XP,YP,XB,YB,phi,S)                          # Compute Mx and My geometric integrals
+                
+            # Check if grid points are in object
+            # - If they are, assign a velocity of zero
+            if afPath.contains_points([(XP,YP)]):                               # If (XP,YP) is in the body
+                Vx[m,n] = 0.0007                                                     # X-velocity is zero
+                Vy[m,n] = 0.0007                                                     # Y-velocity is zero
+            else:
+                Vx[m,n] = Vinf*np.cos(AoAR) + sum(lam*Mx/(2*np.pi))             # Set X-velocity
+                Vy[m,n] = Vinf*np.sin(AoAR) + sum(lam*My/(2*np.pi))             # Set Y-velocity
+        
+    # Compute grid point velocity magnitude and pressure coefficient
+    Vxy  = np.sqrt(Vx**2 + Vy**2)                                               # Compute magnitude of velocity vector
+    CpXY = 1 - (Vxy/Vinf)**2                                                    # Pressure coefficient []
+
+    ## ========================== ##
+    ## ADD INFORMATION TO FIGUREs ##
+    ## ========================== ##
+
+    fig1 = make_subplots(rows=2, cols=2,
+                         subplot_titles=("Panel Geometry", "Surface Pressure Distribution", "Pressure Field", "Airflow streamlines"), 
+                         horizontal_spacing=0.3
+                        )
+    
+    #Add plots
+    fig1.add_trace(go.Scatter(
+                name="Complete Panel Geometry",
+                x=XB, y=YB,
+                mode="lines",  #Plot as a line
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=1, col=1)
+    
+    fig1.add_trace(go.Scatter(
+                name="Panel Boundary Points",
+                x=XB, y=YB,
+                mode='markers',  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=1, col=1)
+    
+    fig1.add_trace(go.Scatter(
+                name="Panel Control Points",
+                x=XC, y=YC,
+                mode="markers",  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=1, col=1)
+    
+    #Separate Cp and Xc into upper and lower for plotting
+    midIndS = int(np.floor(len(Cp)/2))
+    XC_upper = XC[0:midIndS]
+    CP_upper = Cp[0:midIndS] 
+    XC_lower = XC[midIndS+1:len(XC)]
+    CP_lower = Cp[midIndS+1:len(XC)]                                    
+
+    fig1.add_trace(go.Scatter(
+                name="Upper Surface Pressure Distribution",
+                x=XC_upper, y=CP_upper,
+                mode='markers',  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=1, col=2)
+    
+    fig1.add_trace(go.Scatter(
+                name="Lower Surface Pressure Distribution",
+                x=XC_lower, y=CP_lower,
+                mode='markers',  #Plot as a point
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=1, col=2)
+    
+    fig1.add_trace(go.Contour(name="Pressure Field",
+                              x=Xgrid, y=Ygrid, z=CpXY,
+                              colorscale="RdBu_r", zmin=np.min(CpXY), zmax=np.max(CpXY),
+                              contours=dict(start=np.min(CpXY),
+                                            end  = np.max(CpXY),
+                                            size = abs(np.min(CpXY) + np.max(CpXY)) / 100,
+                                           ),
+                              contours_showlines=False,
+                              showscale=False,
+                              hovertemplate='x = %{x:.4f}'+
+                                            '<br>y = %{y:.4f}'+
+                                            '<br>Cp = %{z:.4e}'+
+                                            '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
+                             ),
+                   row=2, col=1
+                  )
+    
+    #Append streamline
+    Vx = np.where(Vx == 0, np.nan, Vx)
+    Vy = np.where(Vy == 0, np.nan, Vy)
+    streamlines = ff.create_streamline(Xgrid, Ygrid,
+                                        Vx, Vy,
+                                        density=0.8,
+                                        arrow_scale=0.05,
+                                        hoverinfo='skip',
+                                        name='streamlines',
+                                        line=dict(color='rgba(0,0,0,1)', width=0.75)
+                                        )
+    for t in streamlines.data:
+        fig1.append_trace(t, row=2, col=2)
+  
+    
+    fig1.add_trace(go.Contour(name="Velocity Field",
+                              x=Xgrid, y=Ygrid, z=Vxy,
+                              colorscale="RdBu_r", zmin=np.min(Vxy), zmax=np.max(Vxy),
+                              contours=dict(start=np.min(Vxy),
+                                            end  = np.max(Vxy),
+                                            size = (np.min(Vxy) + np.max(Vxy)) / 100,
+                                           ), 
+                              contours_showlines=False,
+                              showscale=False,
+                              hovertemplate='x = %{x:.4f}'+
+                                            '<br>y = %{y:.4f}'+
+                                            '<br>Vmag = %{z:.4e}'+
+                                            '<extra></extra>', ## '<extra></extra>' removes the trace name from hover text
+                             ),
+                   row=2, col=2
+                  )
+
+    fig1.add_trace(go.Scatter(
+                name="Airfoil",
+                x=XB, y=YB,
+                mode="lines",  #Plot as a line
+                fill="toself",
+                fillcolor="black",  #Solid black color
+                line=dict(color="black"),  
+                opacity=1 , #Fully opaque,
+                hovertemplate='x = %{x:.4f}'+
+                  '<br>y = %{y:.4f}'+
+                  '<extra></extra>',
+                        ), row=[2, 2], col=[1, 2])
+
+    #Update x-axis properties
+    fig1.update_xaxes(#title_text='x',
+                      title_font_color='#000000',
+                      title_standoff=0,
+                      gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB
+                      gridwidth=1,
+                      zerolinecolor='#000000',
+                      zerolinewidth=2,
+                      linecolor='#000000',
+                      linewidth=1,
+                      ticks='outside',
+                      ticklen=10,
+                      tickwidth=2,
+                      tickcolor='#000000',
+                      tickfont_color='#000000',
+                      minor_showgrid=True,
+                      minor_gridcolor='rgba(221, 221, 221, 0.50)', #DDDDDD in RGB, 0.50 opacity
+                      minor_ticks='outside',
+                      minor_ticklen=5,
+                      minor_tickwidth=2,
+                      minor_griddash='dot',
+                      hoverformat='.4f',
+                     )
+    
+    #Update y-axis properties
+    fig1.update_yaxes(#title_text='y',
+                      title_font_color='#000000',
+                      title_standoff=0,
+                      gridcolor='rgba(153, 153, 153, 0.75)', #999999 in RGB, 0.75 opacity
+                      gridwidth=1,
+                      zerolinecolor='#000000',
+                      zerolinewidth=2,
+                      linecolor='#000000',
+                      linewidth=1,
+                      ticks='outside',
+                      ticklen=10,
+                      tickwidth=2,
+                      tickcolor='#000000',
+                      tickfont_color='#000000',
+                      minor_showgrid=True,
+                      minor_gridcolor='rgba(221, 221, 221, 0.50)', #DDDDDD in RGB, 0.50 opacity
+                      minor_ticks='outside',
+                      minor_ticklen=5,
+                      minor_tickwidth=2,
+                      minor_griddash='dot',
+
+                     )
+    
+    fig1.update_xaxes(scaleanchor="y", row=1, col=1)
+    fig1.update_xaxes(scaleanchor="y", row=1, col=2)
+  
+    #Update figure layout
+    fig1.update_layout(font_color='#000000',
+                       plot_bgcolor='rgba(255,255,255,1)',
+                       paper_bgcolor='rgba(255,255,255,1)',
+                       showlegend=False,
+                      )
     return fig1
