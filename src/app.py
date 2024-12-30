@@ -39,6 +39,11 @@ from src.plots.plotSourceUniform import plotSourceUniform
 from src.plots.plotRankine import plotRankine
 from src.plots.plotCylinder import plotCylinder
 from src.plots.plotRotatingCylinder import plotRotatingCylinder
+from src.plots.plotTAT import plotFlappedAirfoil
+from src.plots.plotTAT import plotParabolicAirfoil
+from src.plots.plotTAT import plotCubicAirfoil
+from src.plots.plotTAT import plotNACA4Airfoil
+from src.plots.plotPanel import plotSourceCylinder
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -323,8 +328,52 @@ def display_selected_data(clickData):
     
 
 ## ----------------------------------- ##
+##     App callables for TAT page      ##
+## ----------------------------------- ##
+
+@app.callback(Output("flappedAirfoil", "figure"),
+              Input("flapAngle", "value"), 
+              Input("angleOfAttack1", "value"),
+              Input("flapRatio", "value")
+              )
+def updateFlappedAirfoil(flapAngle, angleOfAttack1, flapRatio):
+    return plotFlappedAirfoil(1, flapAngle, 1, flapRatio, angleOfAttack1)
+
+@app.callback(Output("parabolicAirfoil", "figure"),
+              Input("angleOfAttack2", "value"),
+              Input("maxCamber", "value")
+              )
+def updateParabolicAirfoil(angleOfAttack2, maxCamber):
+    return plotParabolicAirfoil(1, maxCamber, 1, angleOfAttack2)
+
+@app.callback(Output("cubicAirfoil", "figure"),
+              Input("clOpt", "value"),
+              Input("cmAC", "value"),
+              Input("angleOfAttack3", "value")
+              )
+def updateCubicAirfoil(clOpt, cmAC, angleOfAttack3):
+    return plotCubicAirfoil(1, clOpt, cmAC, 1, angleOfAttack3)
+
+@app.callback(Output("NACA4Airfoil", "figure"),
+              Input("maxCamber2", "value"),
+              Input("maxCamberPosition", "value"),
+              Input("angleOfAttack4", "value")
+              )
+def updateNACA4Airfoil(maxCamber2, maxCamberPosition, angleOfAttack4):
+    return plotNACA4Airfoil(1, maxCamberPosition, 1, maxCamber2, angleOfAttack4)
+
+## ----------------------------------- ##
 ## App callables for panel method page ##
 ## ----------------------------------- ##
+
+@app.callback(Output("SourceCylinder", "figure"),
+              Input("numPanel", "value"),
+              Input("velocity", "value"),
+              Input("angleOfAttack10", "value"))
+
+def updateSourceCylinder(numPanel, velocity, angleOfAttack10):
+    return plotSourceCylinder(angleOfAttack10, numPanel, velocity)
+
 
 ## =================== ##
 ## Main code execution ##
