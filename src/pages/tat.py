@@ -8,8 +8,8 @@ def tat():
     html.H1("Thin Airfoil Theory"),
 
     dcc.Markdown(r"""
-    The analysis of **inviscid and incompressible aerodynamic wing analysis** is separated into two procedures. Firstly, the wing section or airfoil
-    properties are considered, these are then modified to account for the complete, finite wing. This is highly useful as it allows us to decouple these two 
+    The **inviscid and incompressible aerodynamic wing analysis** is separated into two procedures. Firstly, the wing section or airfoil
+    properties are considered, these are then modified to account for the complete, finite wing. This is highly useful, as it allows us to decouple these two 
     processes, the first of these is the subject of this section and it is called **thin-airfoil theory**. Before we delve into this theory, we must establish a few key 
     concepts uisng the knowledge from the previous sections.
     
@@ -28,23 +28,23 @@ def tat():
     vortex sheet but we must calculate the strength of the individual vortices that form this sheet to make the body a streamline of the flow. To do this, we will consider an infinite
     amount of vortices, then we define $$\gamma = \gamma (s)$$ as the strength of the vortex sheet per unit length along $$s$$, which is simply a coordinate along the body. 
     Since this strength per unit length varies along the body, we can then integrate it to obtain the total vorticity of the entire sheet representation and then the lift per unit depth of the body
-    from the Kutta-Joukowski theorem. 
+    from the Kutta-Joukowski theorem 
                  
     $$
-    \Gamma = \int \gamma \, ds              
+    \Gamma = \int \gamma \, ds.              
     $$
     $$
-    L' = \rho_{\infty} V_{\infty} \Gamma
+    L' = \rho_{\infty} V_{\infty} \Gamma.
     $$
 
     You might be thinking about **why we use vortices** and not sources or doublets, for example. Firstly, our goal is to calculate the lift and moment of different airfoils (excluding drag due to the limitations of inviscid theory) and
     the vortex is the only elementary flow which **creates circulation**, and without it there wouldn't be any lift as you can see in the Kutta-Joukowski theorem. Hence, we always need to have vortices in our modelling, other elementary flow
-    components can be added as you will see later on but vortices are a necessity. Secondly, it also sort of **models the effect of the boundary layer** along the surface of the body, which also
+    components can be added as you will see later on, but vortices are a necessity. Secondly, it also sort of **models the effect of the boundary layer** along the surface of the body, which also
     inherently creates vorticity due to the no-slip condition. It is then a way to emulate its effects in a theory which neglects it in other aspects. 
     
     Finally, as we saw with the lifting flow around a cylinder case, there were an infinite number of theoretical solutions depending on the value of circulation used. The same issue arises for the airfoil, we can 
-    have an infinite choice for the value of circulation for an airfoil at a given angle of attack. However, from experimental measurements it is clear that an airfoil will the same lift force (which is related to vorticity) at the same angle
-    of attack every time. The condition for which we obtain the same circulation and flow pattern around an airfoil as in experiments in called the **Kutta condition** and it goes as follows:
+    have an infinite choice for the value of circulation for an airfoil at a given angle of attack. However, from experimental measurements it is clear that an airfoil will have the same lift force (which is related to vorticity) at the same angle
+    of attack every time. The condition for which we obtain the same circulation and flow pattern around an airfoil as in experiments is called the **Kutta condition** and it goes as follows:
 
     A. The value of $$\Gamma$$ is such that **the airflow around the airfoil**, at a given angle of attack, **leaves the trailing edge smoothly**. 
     
@@ -58,8 +58,8 @@ def tat():
     dcc.Markdown(r"""    
     
     It is generally not possible to find a solution to the vorticity distribution we created, hence some further simplications
-    must be made. We will now consider thin airfoils ($$<6\% t/c$$), if we look at these from far away then they can be seen as if they were only the camber line due to this small thickness. Additionally,
-    from even farther away the camber line can be seen if it were on the chord line. Taking this into account, we make the following modelling decisions and conditions:
+    must be made. We will now consider **thin airfoils** ($$<6\% t/c$$), if we look at these from far away then they can be seen as if they were **only the camber line** due to this small thickness. Additionally,
+    from even farther away the **camber line can be seen if it were on the chord line**. Taking this into account, we make the following modelling decisions and conditions:
 
     A. The **camber line is a streamline of the flow**, instead of the body itself.
                   
@@ -78,7 +78,7 @@ def tat():
     html.H2("Symmetric Airfoil Results."),
     dcc.Markdown(r"""
                  
-    The results obtained for a symmetric airfoil, one with no camber, are as follows:
+    The results obtained for a **symmetric airfoil, one with no camber,** are as follows:
 
     $$
     c_{l} = 2 \pi \alpha         
@@ -101,7 +101,7 @@ def tat():
     html.H2("Cambered Airfoil Results."),
     dcc.Markdown(r"""    
 
-    The result for a cambered airfoil is essentially the symmetric case plus a Fourier series term (an infinite trigonometric series). The key expressions
+    The result for a **cambered airfoil** is essentially the symmetric case plus a Fourier series term (an infinite trigonometric series). The key expressions
     are:
 
     $$
@@ -134,15 +134,14 @@ def tat():
     html.Hr(),
     html.H2("Airfoil Examples"),
     dcc.Markdown(r""" 
-
-                 
+  
     In this section you can modify parameters for certain airfoils and observe the changes in the results, all calculations are based on thin-airfoil theory results. 
-    Below, the center of pressure is indicated as a red dot in the camber line and the current lift and moment (about c/4) is indicated
-    as a dot in the respective plots.                     
+    Below, the **center of pressure is indicated as a red dot on the camber line** and the **current lift and moment** (about c/4) is indicated
+    as a **dot in the respective plots**.                     
 
     **1. Flapped Airfoil**
 
-    This airfoil is essentially a flat plate with an angled section resembling a **flap**, it is based on the airfoil from Exercise 4.6. 
+    This airfoil is essentially a **flat plate with an angled section** resembling a **flap**, it is based on the airfoil from Exercise 4.6. 
     Its camber line is given below, where $$c$$ is the chord length, $$c_{f}$$ is the flap length on the x-axis and $$\delta$$ is the angle of the flap. 
 
     $$
@@ -198,8 +197,8 @@ def tat():
 
     **2. Parabolic Airfoil**
 
-    In this case we have an airfoil described by a **parabola** like in Exercise 4.1. Its camber line is shown below where $$k$$ is the maximum camber at the
-    mid point of the airfoil. 
+    In this case we have an airfoil described by a **parabola** like in Exercise 4.1. Its camber line is shown below where $$k$$ is the **maximum camber at the
+    mid point** of the airfoil. 
 
     $$
     z(x) = 4k\left(x - \frac{x^{2}}{c}\right)             
@@ -248,12 +247,12 @@ def tat():
     we modify our approach to be that of **design rather than analysis**, such that we provide performance parameters like lift coefficient or moment coefficient and calculate the camber
     line to achieve this. This is in contrast to the previous examples where we modified the camber line and observed the results. 
                      
-    The camber line in question is designed in such a way that we provide the **optimal lift coefficient**, the one which occurs at the angle of attack at which the flow
-    is smoothly attached to the leading edge as well, and the **aerodynamic center moment coefficient**, which then allows us to calculate the first three coefficients of the Fourier terms
+    The camber line in question is designed in such a way that we provide the **optimal lift coefficient**, the one which **occurs at the angle of attack at which the flow
+    is smoothly attached to the leading edge** as well, and the **aerodynamic center moment coefficient**, which then allows us to calculate the first three coefficients of the Fourier terms
     since the rest are free to be chosen and hence made zero. This is the approach used in the lecture slides and additional course material to obtain a camber line for neutral stability. 
 
-    The optimal lift coefficient is called as such because when the flow is attached at the leading edge, we obtain low circulation in that area, which in reality turns out to
-    prevent flow separation or the transition of the boundary layer to a turbulent mode (because the airflow is more laminar). Hence, it is the lift coefficient for **minimum drag**. Note that in the
+    The optimal lift coefficient is called as such because **when the flow is attached at the leading edge**, we obtain **low circulation in that area**, which in reality turns out to
+    **prevent flow separation or the transition of the boundary layer** to a turbulent mode (because the airflow is more laminar). Hence, it is the lift coefficient for **minimum drag**. Note that in the
     following plots, the airfoil can appear to warp when changing the angle of attack, this is only due to the scaling of the axes and it does not change geometrically.   
 
     """, mathjax=True),
@@ -309,7 +308,7 @@ def tat():
 
     **4. NACA 4-Series Airfoil**
 
-    Finally, we can take a look more sophisticated airfoils to verify the accuracy of thin-airfoil theory by comparing its results with software like X-FOIL, which accounts for thickness. We will use the 4-digit series of the NACA airfoils. 
+    Finally, we can take a look more sophisticated airfoils to verify the accuracy of thin-airfoil theory by comparing its results with software like **X-FOIL**, which accounts for thickness. We will use the **4-digit series of the NACA airfoils**. 
     The camber line (normalized for a chord of 1) for these is defined as given below, where $$P/10$$ is the location of the maximum camber on the chord and $$M/100$$ is the
     maximum camber, so the 4-digit code reads as MPTT where TT is the thickness to chord ratio (neglected in this analysis).
 
@@ -372,23 +371,15 @@ def tat():
 
     dcc.Markdown(r"""                    
 
-    We will test the NACA 2404 and 2412 airfoils, both with thin-airfoil theory and X-FOil, the results are summarized below. It can be seen for the thinner version
+    We will **test the NACA 2404 and 2412 airfoils**, both **with thin-airfoil theory and X-FOil**, the results are summarized below. It can be seen for the thinner version
     the $$c_{l}$$ is quite close while the $$c_{m}$$ is also close but not so much. Even for 3 times the thickness, the results are still close, while the $$c_{m}$$ continues
     to deviate as it is clearly not constant when accounting for thickness.      
 
     """, mathjax=True),
 
-    dcc.Markdown('''
-    |                          |       |   **Thin-Airfoil Theory**    |         **X-FOIL**         |
-    |--------------------------|-------|-----------------------------------------------------------|
-    |                          | AoA   | CL         | CM              | CL               | CM      |
-    |                          |       |            |                 |                  |         |
-    | **NACA 2404**            | α=0º  | 0.2457     | -0.0465         | 0.2363           | -0.0537 |
-    |                          | α=5º  | 0.794      | -0.0465         | 0.8034           | -0.0562 |
-    |                          | α=12º | 1.5616     | -0.0465         | N/A              | N/A     |
-    |                          |       |            |                 |                  |         |
-    | **NACA 2412**            | α=0º  | 0.2457     | -0.0465         | 0.256            | -0.0593 |
-    |                          | α=5º  | 0.794      | -0.0465         | 0.8589           | -0.0634 |
-    |                          | α=12º | 1.5616     | -0.0465         | 1.69             | -0.074  |
-    ''')
+    html.Img(src="assets/TAT-vs-XFOIL.png",
+            style={
+                "width": "600px",  # Set desired width
+                "height": "auto"  })
+    
     ])

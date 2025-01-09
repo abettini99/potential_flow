@@ -39,6 +39,9 @@ from src.plots.plotTAT import plotParabolicAirfoil
 from src.plots.plotTAT import plotCubicAirfoil
 from src.plots.plotTAT import plotNACA4Airfoil
 from src.plots.plotPanel import plotSourceCylinder
+from src.plots.plotPanel import plotSourceAirfoil
+from src.plots.plotPanel import plotVortexAirfoil
+from src.plots.plotPanel import plotSourceVortexAirfoil
 
 SIDEBAR_STYLE = {
     "position"        : "fixed",
@@ -292,6 +295,29 @@ def updateNACA4Airfoil(maxCamber2, maxCamberPosition, angleOfAttack4):
 def updateSourceCylinder(numPanel, velocity, angleOfAttack10):
     return plotSourceCylinder(angleOfAttack10, numPanel, velocity)
 
+@app.callback(Output("SourceAirfoil", "figure"),
+              Input("airfoilType1", "value"),
+              Input("velocity2", "value"),
+              Input("angleOfAttack11", "value"))
+
+def updateSourceAirfoil(airfoilType1, velocity2, angleOfAttack11):
+    return plotSourceAirfoil(angleOfAttack11, velocity2, airfoilType1)
+
+@app.callback(Output("VortexAirfoil", "figure"),
+              Input("airfoilType2", "value"),
+              Input("velocity3", "value"),
+              Input("angleOfAttack12", "value"))
+
+def updateVortexAirfoil(airfoilType2, velocity3, angleOfAttack12):
+    return plotVortexAirfoil(angleOfAttack12, velocity3, airfoilType2)
+
+@app.callback(Output("SourceVortexAirfoil", "figure"),
+              Input("airfoilType3", "value"),
+              Input("velocity4", "value"),
+              Input("angleOfAttack13", "value"))
+
+def updateSourceVortexAirfoil(airfoilType3, velocity4, angleOfAttack13):
+    return plotSourceVortexAirfoil(angleOfAttack13, velocity4, airfoilType3)
 
 ## =================== ##
 ## Main code execution ##

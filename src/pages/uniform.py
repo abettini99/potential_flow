@@ -20,7 +20,7 @@ def uniform():
     \phi = V_{\infty} \left[xcos\left(\theta_{\infty}\right) + ysin\left(\theta_{\infty}\right)\right]\\,
     $$
     $$
-    \Psi = V_{\infty} \left[y cos(\theta_{\infty}) - x sin(\theta_{\infty}) \right]
+    \Psi = V_{\infty} \left[y cos(\theta_{\infty}) - x sin(\theta_{\infty}) \right],
     $$
     
     and its velocity components are then

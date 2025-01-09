@@ -16,10 +16,10 @@ def vortex():
     has a constant velocity but its value between streamlines is inversely proportional to the distance from the center. Its velocity potential and stream function are     
 
     $$
-    \phi = -\frac{\Gamma}{2 \pi} \theta\\.
+    \phi = -\frac{\Gamma}{2 \pi} \theta\\,
     $$
     $$
-    \Psi = \frac{\Gamma}{2 \pi} ln(r)\\,
+    \Psi = \frac{\Gamma}{2 \pi} ln(r)\\.
     $$
     Here, $$\Gamma$$ is defined as the vortex strength, being the value of the circulation along any streamline of a vortex flow. Its velocity components are
     $$
@@ -118,7 +118,7 @@ def vortex():
     due to this unsymmetrical flow pattern, by using the expression from Chapter 1 of _Fundamentals of Aerodynamics_ we have
 
     $$
-    L^{'} = \frac{1}{2} \rho_{\infty} V^{2}_{\infty} S c_{l} = \frac{1}{2} \rho_{\infty} V^{2}_{\infty} S \left[ -\frac{1}{2} \int_{0}^{2 \pi} C_{p} sin(\theta) \, d\theta \right] = \rho_{\infty} V_{\infty} \Gamma
+    L^{'} = \frac{1}{2} \rho_{\infty} V^{2}_{\infty} S c_{l} = \frac{1}{2} \rho_{\infty} V^{2}_{\infty} S \left[ -\frac{1}{2} \int_{0}^{2 \pi} C_{p} sin(\theta) \, d\theta \right] = \rho_{\infty} V_{\infty} \Gamma.
     $$
 
     This is the expression for the lift acting on the cylinder, it is directly related to the circulation and it connects to a more general theorem about the lift over arbitrary bodies called

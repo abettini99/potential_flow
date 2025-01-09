@@ -163,7 +163,7 @@ def source():
     \phi = \frac{\Lambda}{2 \pi} ln\left(\sqrt{d^{2} + r^{2} + 2rdcos(\theta)}\right) + \frac{-\Lambda}{2 \pi} ln\left(\sqrt{d^{2} + r^{2} - 2rdcos(\theta)}\right) + V_{\infty} r cos(\theta)\\,
     $$
     $$
-    \Psi = V_{\infty} r sin(\theta) + \frac{\Lambda}{2 \pi} \left[ arctan\left( \frac{r sin(\theta)}{r cos(\theta) - d} \right) - arctan\left(\frac{r sin(\theta)}{r cos(\theta) + d} \right) \right]
+    \Psi = V_{\infty} r sin(\theta) + \frac{\Lambda}{2 \pi} \left[ arctan\left( \frac{r sin(\theta)}{r cos(\theta) - d} \right) - arctan\left(\frac{r sin(\theta)}{r cos(\theta) + d} \right) \right],
     $$
     and its velocity components are
     $$

@@ -479,8 +479,8 @@ def plotSourceCylinder(alpha, panels, V):
     # %% COMPUTE STREAMLINES - REF [4]
 
     # Grid parameters
-    nGridX   = 100                                                              # X-grid for streamlines and contours
-    nGridY   = 100                                                              # Y-grid for streamlines and contours
+    nGridX   = 40                                                              # X-grid for streamlines and contours
+    nGridY   = 40                                                              # Y-grid for streamlines and contours
     xVals    = [-1.5, 1.5]                                                      # X-grid extents [min, max]
     yVals    = [-1.5, 1.5]                                                      # Y-grid extents [min, max]
         
@@ -806,8 +806,8 @@ def plotSourceAirfoil(alpha, V, name):
     # %% COMPUTE STREAMLINES
 
     # Grid parameters
-    nGridX   = 100                                                              # X-grid for streamlines and contours
-    nGridY   = 100                                                              # Y-grid for streamlines and contours
+    nGridX   = 40                                                              # X-grid for streamlines and contours
+    nGridY   = 40                                                              # Y-grid for streamlines and contours
     xVals    = [-0.5, 1.5]                                                      # X-grid extents [min, max]
     yVals    = [-0.5, 0.5]                                                      # Y-grid extents [min, max]
         
@@ -1157,8 +1157,8 @@ def plotVortexAirfoil(alpha, V, name):
 
  
     # Grid parameters
-    nGridX   = 150                                                              # X-grid for streamlines and contours
-    nGridY   = 150                                                              # Y-grid for streamlines and contours
+    nGridX   = 40                                                              # X-grid for streamlines and contours
+    nGridY   = 40                                                              # Y-grid for streamlines and contours
     xVals    = [-0.5, 1.5]                                                      # X-grid extents [min, max]
     yVals    = [-0.3, 0.3]                                                      # Y-grid extents [min, max]
         
@@ -1526,8 +1526,8 @@ def plotSourceVortexAirfoil(alpha, V, name):
 
     
     # Grid parameters
-    nGridX = 100                                                                # X-grid for streamlines and contours
-    nGridY = 100                                                                # Y-grid for streamlines and contours
+    nGridX = 40                                                                # X-grid for streamlines and contours
+    nGridY = 40                                                                # Y-grid for streamlines and contours
     xVals  = [min(XB)-0.5, max(XB)+0.5]                                         # X-grid extents [min, max]
     yVals  = [min(YB)-0.3, max(YB)+0.3]                                         # Y-grid extents [min, max]
         
